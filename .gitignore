@@ -2,7 +2,7 @@
 
 # our own ignore files
 .DS_Store
-utils/__pycache__/
+./utils/__pycache__/
 data/
 Output/
 
