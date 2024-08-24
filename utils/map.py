@@ -48,7 +48,7 @@ class FoliumWidget(QWidget):
 
         #to display the Folium map
         web_view = QWebEngineView()
-        web_view.setHtml(open("utils\map_final.html").read())
+        web_view.setHtml(open("utils/map_final.html").read())
         layout.addWidget(web_view)
 
     def update_map_with_input(self):
