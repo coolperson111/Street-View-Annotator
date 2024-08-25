@@ -72,6 +72,8 @@ class GLWidget(QGLWidget):
 
     def paintGL(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+        # Street view rendering
         glPushMatrix()
         glRotatef(self.pitch, 1, 0, 0)
         glRotatef(self.yaw, 0, 1, 0)
@@ -81,11 +83,15 @@ class GLWidget(QGLWidget):
         gluSphere(self.sphere, 1, 100, 100)
         glPopMatrix()
 
+        # draw the crosshair
+        self.draw_crosshair()
+
     def resizeGL(self, width, height):
         glViewport(0, 0, width, height)
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
         gluPerspective(self.fov, self.width() / self.height(), 0.1, 1000)
+        glMatrixMode(GL_MODELVIEW)
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
@@ -282,3 +288,33 @@ class GLWidget(QGLWidget):
         full_path = os.path.join(self.output_directory, f"{encoded_filename}.png")
         self.image.save(full_path)
         print(f"Street-view Image saved")
+
+    def draw_crosshair(self):
+        glMatrixMode(GL_PROJECTION)
+        glPushMatrix()
+        glLoadIdentity()
+        glOrtho(-1, 1, -1, 1, -1, 1)
+
+        glMatrixMode(GL_MODELVIEW)
+        glPushMatrix()
+        glLoadIdentity()
+
+        glDisable(GL_TEXTURE_2D)
+        glColor3f(1.0, 1.0, 1.0)  # White color
+        glLineWidth(2.0)  # Set line width
+
+        glBegin(GL_LINES)
+        # Vertical line
+        glVertex2f(0, 0.03)
+        glVertex2f(0, -0.03)
+        # Horizontal line
+        glVertex2f(-0.05, 0)
+        glVertex2f(0.05, 0)
+        glEnd()
+
+        glEnable(GL_TEXTURE_2D)
+
+        glPopMatrix()
+        glMatrixMode(GL_PROJECTION)
+        glPopMatrix()
+        glMatrixMode(GL_MODELVIEW)
