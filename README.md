@@ -38,7 +38,7 @@ pip install -r requirements.txt
 python -m gui
 ```
 ## Tutorial
-![App Overview Image](utils/Readme/App_full_image.png)
+![App Overview Image](assets/imgs/Readme/App_full_image.png)
 
 After opening the app, follow these steps:
 
@@ -59,7 +59,7 @@ On the left, there is a side bar containing stroke width and color selection too
 
 ## Street View Display
 
-<img src="https://github.com/Frozensun47/Street-View-Annotator/blob/main/utils/Readme/street_view_marker.gif" alt="App Overview GIF" width="400" height="200">
+<img src="https://github.com/Frozensun47/Street-View-Annotator/blob/main/assets/imgs/Readme/street_view_marker.gif" alt="App Overview GIF" width="400" height="200">
 
 In the middle, there is the street view display with functionalities:
 
@@ -71,19 +71,19 @@ On the top right side, there are various buttons:
 
 - **Update Map:** Press to update the map with the entered coordinates. (To be pressed after Text Input Box input is provided)
 
-<img src="https://github.com/Frozensun47/Street-View-Annotator/blob/main/utils/Readme/markers.png" alt="markers" width="200" height="200">
+<img src="https://github.com/Frozensun47/Street-View-Annotator/blob/main/assets/imgs/Readme/markers.png" alt="markers" width="200" height="200">
 
 - **Get Polygon:** Draws polygons on the aerial view map corresponding to markers in the street view map. (more than 3 markers in the street view is required)
 
-<img src="https://github.com/Frozensun47/Street-View-Annotator/blob/main/utils/Readme/aerial_polygon-marker.png" alt="polygon" width="200" height="200">
+<img src="https://github.com/Frozensun47/Street-View-Annotator/blob/main/assets/imgs/Readme/aerial_polygon-marker.png" alt="polygon" width="200" height="200">
 
 - **Remove Marker:** Removes all markers on the map.
 
-<img src="https://github.com/Frozensun47/Street-View-Annotator/blob/main/utils/Readme/Aerial_view_polygon.png" alt="remove_marker" width="200" height="200">
+<img src="https://github.com/Frozensun47/Street-View-Annotator/blob/main/assets/imgs/Readme/Aerial_view_polygon.png" alt="remove_marker" width="200" height="200">
 
 - **Remove Polygon:** Removes all drawn polygons on the map.
 
-<img src="https://github.com/Frozensun47/Street-View-Annotator/blob/main/utils/Readme/remove_polygon.png" alt="remove_polygon" width="200" height="200">
+<img src="https://github.com/Frozensun47/Street-View-Annotator/blob/main/assets/imgs/Readme/remove_polygon.png" alt="remove_polygon" width="200" height="200">
 
 - **Get Panorama Image:** Fetches the panorama of the last placed marker on the map and shows it to the street view display.
 
