@@ -19,6 +19,8 @@ class GLWidget(QGLWidget):
     def __init__(self, parent, sidebar_widget, image, depth, heading, lat, lng):
         super().__init__(parent)
 
+        self.setFocusPolicy(Qt.StrongFocus)
+
         self.lat, self.lng = lat, lng
         self.image = image
         self.depth = depth
@@ -92,6 +94,21 @@ class GLWidget(QGLWidget):
         glLoadIdentity()
         gluPerspective(self.fov, self.width() / self.height(), 0.1, 1000)
         glMatrixMode(GL_MODELVIEW)
+
+    def keyPressEvent(self, event):
+        speed = 5
+        if event.key() == QtCore.Qt.Key_Up:
+            print(self.pitch)
+            self.pitch = self.pitch - speed
+        elif event.key() == QtCore.Qt.Key_Down:
+            self.pitch = self.pitch + speed
+        elif event.key() == QtCore.Qt.Key_Left:
+            self.yaw = 360 if self.yaw == 0 else self.yaw
+            self.yaw = (self.yaw - speed) % 360
+        elif event.key() == QtCore.Qt.Key_Right:
+            self.yaw = (self.yaw + speed) % 360
+        self.update()
+        self.moving = False
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
