@@ -1,25 +1,29 @@
+import base64
+import math
+import os
+
+import numpy as np
 from OpenGL.GL import *
 from OpenGL.GLU import *
-import base64
-import os
-from PyQt5.QtOpenGL import QGLWidget
-from PyQt5 import QtCore
 from PIL import Image, ImageDraw
-from PyQt5.QtCore import Qt, QPoint
+from PyQt5 import QtCore
+from PyQt5.QtCore import QPoint, Qt
 from PyQt5.QtGui import QCursor
-import math
-import numpy as np
+from PyQt5.QtOpenGL import QGLWidget
+
 from utils.processor import *
 from utils.utils import get_new_coords
+
+
 class GLWidget(QGLWidget):
-    def __init__(self, parent, sidebar_widget, image, depth, heading,lat,lng):
+    def __init__(self, parent, sidebar_widget, image, depth, heading, lat, lng):
         super().__init__(parent)
-        
-        self.lat,self.lng = lat,lng
+
+        self.lat, self.lng = lat, lng
         self.image = image
         self.depth = depth
         self.image_width, self.image_height = self.image.size
-        self.output_directory = 'Output'
+        self.output_directory = "Output"
         self.yaw = 270
         self.heading = heading
         self.pitch = 0
@@ -28,25 +32,35 @@ class GLWidget(QGLWidget):
         self.fov = 90
         self.direction = 0
         self.moving = False
-        
+
         self.coordinates_stack = []
         self.markers_stack = []
-        
+
         self.sidebar_widget = sidebar_widget
-        #street view params
+        # street view params
         self.stroke_width = 25
-        self.transparency = 50 #in range 0-100
-        self.color = (255,0,0,128)
-        #map params
-        self.map_color = (255,0,0,128)
-        self.map_transparency = 0.5 # in range 0-1
-        self.map_color_name = 'Red'
-    
+        self.transparency = 50  # in range 0-100
+        self.color = (255, 0, 0, 128)
+        # map params
+        self.map_color = (255, 0, 0, 128)
+        self.map_transparency = 0.5  # in range 0-1
+        self.map_color_name = "Red"
+
     def initializeGL(self):
         glEnable(GL_TEXTURE_2D)
         self.texture = glGenTextures(1)
         glBindTexture(GL_TEXTURE_2D, self.texture)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, self.image_width, self.image_height, 0, GL_RGB, GL_UNSIGNED_BYTE, self.image.tobytes())
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_RGB,
+            self.image_width,
+            self.image_height,
+            0,
+            GL_RGB,
+            GL_UNSIGNED_BYTE,
+            self.image.tobytes(),
+        )
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
         self.sphere = gluNewQuadric()
@@ -89,14 +103,20 @@ class GLWidget(QGLWidget):
         heading_offset = 0 - 270
         cal_yaw = (self.yaw - heading_offset) % 360
         cal_pitch = (self.pitch + 90) % 180
-        image_pixel_x, image_pixel_y = self.calculate_image_pixel_coordinates(cal_yaw, cal_pitch, pixel_x, pixel_y)
+        image_pixel_x, image_pixel_y = self.calculate_image_pixel_coordinates(
+            cal_yaw, cal_pitch, pixel_x, pixel_y
+        )
         index_y, index_x = self.calculate_depth_indices(image_pixel_x, image_pixel_y)
         depth = self.depth[index_y][index_x]
 
-        distance, self.direction = self.calculate_distance_and_direction(depth, cal_pitch, cal_yaw)
+        distance, self.direction = self.calculate_distance_and_direction(
+            depth, cal_pitch, cal_yaw
+        )
 
         if depth > 0 and distance > 0:
-            print(f"depth = {depth}, Distance = {distance}, Heading = {self.heading}, Direction = {int(self.direction)}")
+            print(
+                f"depth = {depth}, Distance = {distance}, Heading = {self.heading}, Direction = {int(self.direction)}"
+            )
             lat, lng = self.calculate_new_coords(depth, self.direction)
             self.draw_point(image_pixel_x, image_pixel_y)
             self.markers_stack.append((image_pixel_x, image_pixel_y))
@@ -112,7 +132,9 @@ class GLWidget(QGLWidget):
 
     def screen_to_pixel_coordinates(self):
         pixel_x = int(self.mouse_x / self.width() * self.image_width)
-        pixel_y = int((self.height() - self.mouse_y) / self.height() * self.image_height)
+        pixel_y = int(
+            (self.height() - self.mouse_y) / self.height() * self.image_height
+        )
         return pixel_x, pixel_y
 
     def calculate_image_pixel_coordinates(self, cal_yaw, cal_pitch, pixel_x, pixel_y):
@@ -144,7 +166,7 @@ class GLWidget(QGLWidget):
             try:
                 self.draw_polygon(self.markers_stack)
             except:
-                print('more than markers required')
+                print("more than markers required")
 
     def mouseMoveEvent(self, event):
         if self.moving:
@@ -164,7 +186,6 @@ class GLWidget(QGLWidget):
             QCursor.setPos(self.mapToGlobal(QPoint(center_x, center_y)))
             self.update()
 
-
     def wheelEvent(self, event):
         delta = event.angleDelta().y()
         self.fov -= delta * 0.1
@@ -177,6 +198,7 @@ class GLWidget(QGLWidget):
     def set_stroke_width(self, width):
         self.stroke_width = width
         self.update()
+
     def set_stroke_color(self, color):
         self.color = color
         self.update()
@@ -184,52 +206,79 @@ class GLWidget(QGLWidget):
     def set_map_transparency(self, map_transparency):
         self.map_transparency = map_transparency
         self.update()
+
     def set_map_color(self, map_color, map_color_name):
         self.map_color = map_color
-        self.map_color_name=map_color_name
+        self.map_color_name = map_color_name
         self.update()
 
     def draw_point(self, x, y):
-        draw = ImageDraw.Draw(self.image,'RGBA') # 'RGBA' for transparency
+        draw = ImageDraw.Draw(self.image, "RGBA")  # 'RGBA' for transparency
         half_size = self.stroke_width
         center = (x, y)
         radius = half_size
         point_color = self.color
-        draw.ellipse([(center[0] - radius, center[1] - radius), (center[0] + radius, center[1] + radius)], fill=point_color)
+        draw.ellipse(
+            [
+                (center[0] - radius, center[1] - radius),
+                (center[0] + radius, center[1] + radius),
+            ],
+            fill=point_color,
+        )
         glDeleteTextures(1, [self.texture])
         self.texture = glGenTextures(1)
         glBindTexture(GL_TEXTURE_2D, self.texture)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, self.image_width, self.image_height, 0, GL_RGB, GL_UNSIGNED_BYTE, self.image.tobytes())
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_RGB,
+            self.image_width,
+            self.image_height,
+            0,
+            GL_RGB,
+            GL_UNSIGNED_BYTE,
+            self.image.tobytes(),
+        )
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
         self.update()
 
-    def draw_polygon(self,markers_stack):
-        
-        draw = ImageDraw.Draw(self.image,'RGBA') # 'RGBA' for transparency
-        draw.polygon(markers_stack,self.color)
+    def draw_polygon(self, markers_stack):
+
+        draw = ImageDraw.Draw(self.image, "RGBA")  # 'RGBA' for transparency
+        draw.polygon(markers_stack, self.color)
 
         glDeleteTextures(1, [self.texture])
         self.texture = glGenTextures(1)
         glBindTexture(GL_TEXTURE_2D, self.texture)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, self.image_width, self.image_height, 0, GL_RGB, GL_UNSIGNED_BYTE, self.image.tobytes())
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_RGB,
+            self.image_width,
+            self.image_height,
+            0,
+            GL_RGB,
+            GL_UNSIGNED_BYTE,
+            self.image.tobytes(),
+        )
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
         self.update()
 
     def save_image(self):
-        ''' 
-            - Latitude
-            - Longitude
-            - Aerial (0) / Street-view (1)
-            - Zoom Level (for aerial) / FOV (for street view)
-            - Direction/Pitch (-1 for Aerial)
-            - Yaw (-1 for Aerial)
-            - Panorma (0) / Current-View (1) / Aerial View (-1)
-        '''
-        filename = f'{self.lat},{self.lng},1,{self.fov},{self.pitch},{self.yaw},{0}'
+        """
+        - Latitude
+        - Longitude
+        - Aerial (0) / Street-view (1)
+        - Zoom Level (for aerial) / FOV (for street view)
+        - Direction/Pitch (-1 for Aerial)
+        - Yaw (-1 for Aerial)
+        - Panorma (0) / Current-View (1) / Aerial View (-1)
+        """
+        filename = f"{self.lat},{self.lng},1,{self.fov},{self.pitch},{self.yaw},{0}"
 
         encoded_filename = base64.b64encode(filename.encode()).decode()
-        full_path = os.path.join(self.output_directory, f'{encoded_filename}.png')
+        full_path = os.path.join(self.output_directory, f"{encoded_filename}.png")
         self.image.save(full_path)
         print(f"Street-view Image saved")

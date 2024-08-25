@@ -1,5 +1,8 @@
-from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QColorDialog, QSlider, QLabel, QListWidget, QListWidgetItem, QInputDialog
-from PyQt5 import QtWidgets, QtGui, QtCore
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import (QColorDialog, QInputDialog, QLabel, QListWidget,
+                             QListWidgetItem, QPushButton, QSlider,
+                             QVBoxLayout)
+
 
 class SidebarWidget(QtWidgets.QWidget):
     def __init__(self, gl_widget):
@@ -17,7 +20,9 @@ class SidebarWidget(QtWidgets.QWidget):
         self.stroke_slider.setMaximum(90)
         self.stroke_slider.setValue(self.gl_widget.stroke_width)
         self.stroke_slider.valueChanged.connect(self.on_stroke_width_change)
-        self.stroke_label_value = QLabel(f"Current Width: {self.gl_widget.stroke_width}")
+        self.stroke_label_value = QLabel(
+            f"Current Width: {self.gl_widget.stroke_width}"
+        )
 
         # Transparency slider for polygons
         transparency_label = QLabel("Polygon Transparency:")
@@ -26,16 +31,24 @@ class SidebarWidget(QtWidgets.QWidget):
         self.transparency_slider.setMaximum(100)
         self.transparency_slider.setValue(self.gl_widget.transparency)
         self.transparency_slider.valueChanged.connect(self.on_transparency_change)
-        self.transparency_label_value = QLabel(f"Current Transparency: {self.gl_widget.transparency}")
+        self.transparency_label_value = QLabel(
+            f"Current Transparency: {self.gl_widget.transparency}"
+        )
 
         # Map Transparency slider
         map_transparency_label = QLabel("Map Transparency:")
         self.map_transparency_slider = QSlider(QtCore.Qt.Horizontal)
         self.map_transparency_slider.setMinimum(0)
         self.map_transparency_slider.setMaximum(100)
-        self.map_transparency_slider.setValue(int(self.gl_widget.map_transparency * 100))  # Convert to percentage
-        self.map_transparency_slider.valueChanged.connect(self.on_map_transparency_change)
-        self.map_transparency_label_value = QLabel(f"Current Map Transparency: {int(self.gl_widget.map_transparency * 100)}")
+        self.map_transparency_slider.setValue(
+            int(self.gl_widget.map_transparency * 100)
+        )  # Convert to percentage
+        self.map_transparency_slider.valueChanged.connect(
+            self.on_map_transparency_change
+        )
+        self.map_transparency_label_value = QLabel(
+            f"Current Map Transparency: {int(self.gl_widget.map_transparency * 100)}"
+        )
 
         # Color Palette for polygons
         color_label = QLabel("Polygon Color:")
@@ -88,13 +101,15 @@ class SidebarWidget(QtWidgets.QWidget):
         self.color_button.setStyleSheet(f"background-color: {color.name()};")
 
     def on_map_transparency_change(self, map_transparency):
-        self.map_transparency_label_value.setText(f"Current Map Transparency: {map_transparency}")
+        self.map_transparency_label_value.setText(
+            f"Current Map Transparency: {map_transparency}"
+        )
         self.gl_widget.set_map_transparency(map_transparency)
 
     def on_map_color_button_click(self):
         map_color = QColorDialog.getColor()
         rgba_map_color = map_color.getRgb()
-        self.gl_widget.set_map_color(rgba_map_color,map_color.name())
+        self.gl_widget.set_map_color(rgba_map_color, map_color.name())
         self.map_color_button.setStyleSheet(f"background-color: {map_color.name()}")
 
     def update_coordinates_label(self):
@@ -116,7 +131,9 @@ class SidebarWidget(QtWidgets.QWidget):
         action = menu.exec_(QtGui.QCursor.pos())
 
         if action == edit_action:
-            new_text, ok = QInputDialog.getText(self, "Edit Coordinate", "Enter new coordinate:", text=current_text)
+            new_text, ok = QInputDialog.getText(
+                self, "Edit Coordinate", "Enter new coordinate:", text=current_text
+            )
 
             if ok:
                 item.setText(new_text)
