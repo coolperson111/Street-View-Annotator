@@ -1,19 +1,23 @@
-from streetlevel import streetview
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from PIL import Image
+from streetlevel import streetview
+
 
 def radians_to_degrees(radians):
     degrees = radians * (180 / np.pi)
     return degrees
 
+
 def degrees_to_radians(degrees):
-    radians = degrees * (np.pi/180)
+    radians = degrees * (np.pi / 180)
     return radians
+
 
 def get_panorama_id(lat, long):
     pano = streetview.find_panorama(lat, long)
     return str(pano.id)
+
 
 def download_panorama_image_and_depth(pano_id):
     pano = streetview.find_panorama_by_id(pano_id, download_depth=True)
@@ -22,17 +26,19 @@ def download_panorama_image_and_depth(pano_id):
     # streetview.download_panorama(pano, panorama_path, zoom=20)
     return panorma, pano
 
+
 def save_depth_map(pano):
-    depth_map_path = f"data/Depth_maps/numpy_depth.npy" #{pano.id}_depth.npy
+    depth_map_path = f"data/Depth_maps/numpy_depth.npy"  # {pano.id}_depth.npy
     np.save(depth_map_path, pano.depth.data)
-    
-    plt.imshow(pano.depth.data, cmap='viridis')
-    plt.axis('off')
+
+    plt.imshow(pano.depth.data, cmap="viridis")
+    plt.axis("off")
     depth_image_path = f"data/Depth_maps/depth_image.png"
-    plt.savefig(depth_image_path, bbox_inches='tight', pad_inches=0, transparent=True)
+    plt.savefig(depth_image_path, bbox_inches="tight", pad_inches=0, transparent=True)
     plt.close()
 
-    return pano.depth.data,depth_map_path, depth_image_path
+    return pano.depth.data, depth_map_path, depth_image_path
+
 
 # def generate_heading_pitch_arrays(pano_id, width=512, height=256, center_heading=0):
 #     center_pixel_x = width // 2
@@ -71,6 +77,7 @@ def save_depth_map(pano):
 #     plt.close()
 #     return headings_path
 
+
 def process_location(lat, long):
     pano_id = get_panorama_id(lat, long)
     panorma, pano = download_panorama_image_and_depth(pano_id)
@@ -88,7 +95,6 @@ def process_location(lat, long):
     heading_degrees = radians_to_degrees(pano.heading)
     print("Permalink:", pano.permalink(heading=heading_degrees, pitch=90))
     if pano.depth:
-        depth_map,depth_map_path, depth_image_path = save_depth_map(pano)
+        depth_map, depth_map_path, depth_image_path = save_depth_map(pano)
     # print('Heading:',heading_degrees)
-    return panorma, depth_map , heading_degrees , pano.lat,pano.lon
-    
+    return panorma, depth_map, heading_degrees, pano.lat, pano.lon

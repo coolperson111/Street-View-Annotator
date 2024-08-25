@@ -1,5 +1,6 @@
 import os
 
+
 def delete_files_in_inner_directories(directory_path):
     for root, dirs, files in os.walk(directory_path):
         for file in files:
@@ -10,4 +11,5 @@ def delete_files_in_inner_directories(directory_path):
             except Exception as e:
                 print(f"Error deleting {file_path}: {e}")
 
-delete_files_in_inner_directories('data')
+
+delete_files_in_inner_directories("data")
