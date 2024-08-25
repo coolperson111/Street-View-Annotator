@@ -1,30 +1,28 @@
 import numpy as np
 from OpenGL.GL import *
 from OpenGL.GLU import *
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtGui
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QMainWindow, QWidget
 
-from utils.map import FoliumWidget
+from ui.map import FoliumWidget
+from ui.sidebar import SidebarWidget
+from ui.streetview import GLWidget
 from utils.processor import *
-from utils.sidebar import SidebarWidget
-from utils.streetview import GLWidget
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Street View Annotator")
-        self.setWindowIcon(QtGui.QIcon("utils/icon.png"))
-        # self.image = 'utils/demo_image.jpg'
-        # self.depth = 'utils/demo_depth.npy'
+        self.setWindowIcon(QtGui.QIcon("assets/imgs/icon.png"))
         self.latitude, self.longitude = 30.71979998667062, 76.72142742674824
         self.clipboard_lat, self.clipboard_lng = 30.71979998667062, 76.72142742674824
         self.image, self.depth, self.heading, self.latitude, self.longitude = (
             process_location(self.latitude, self.longitude)
         )  # comment for offline
         # self.heading = 0 # uncomment for offline
-        # self.image = Image.open('utils/demo_image.jpg') # uncomment for offline
-        # self.depth = np.load('utils/demo_depth.npy') # uncomment for offline
+        # self.image = Image.open('assets/demo/demo_image.jpg') # uncomment for offline
+        # self.depth = np.load('assets/demo/demo_depth.npy') # uncomment for offline
         self.sidebar_widget = None
         self.folium_widget = None
         self.create_gl_widget()
@@ -85,12 +83,3 @@ class MainWindow(QMainWindow):
                 self.clipboard_lat, self.clipboard_lng = eval(clipboard_text)
             except:
                 pass
-
-
-if __name__ == "__main__":
-    app = QtWidgets.QApplication([])
-    window = MainWindow()
-    offset = 20
-    window.setGeometry(0 + offset, 20 + offset, 1300 + offset, 900 + offset)
-    window.show()
-    app.exec_()
