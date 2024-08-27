@@ -31,12 +31,12 @@ class FoliumWidget(QWidget):
         layout.addWidget(update_button)
 
         # to trigger marker removal
-        remove_button = QPushButton("Remove Markers", self)
+        remove_button = QPushButton("Annotate", self)
         remove_button.clicked.connect(self.remove_markers)
         layout.addWidget(remove_button)
 
         # to trigger polygon drawing
-        polygon_button = QPushButton("Get Polygon", self)
+        polygon_button = QPushButton("Get Polygon (NO)", self)
         polygon_button.clicked.connect(self.get_polygon)
         layout.addWidget(polygon_button)
 
