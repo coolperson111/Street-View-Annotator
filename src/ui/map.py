@@ -26,28 +26,34 @@ class FoliumWidget(QWidget):
         layout.addWidget(self.coord_input)
 
         # to trigger the coordinate update
-        update_button = QPushButton("Update Map", self)
+        update_button = QPushButton("Save Map", self)
         update_button.clicked.connect(self.update_map_with_input)
         layout.addWidget(update_button)
 
-        # to trigger marker removal
+        # to get the panorama
+        panorama_button = QPushButton("Get Panorama", self)
+        panorama_button.clicked.connect(self.main_window.get_panorama)
+        layout.addWidget(panorama_button)
+
+        # to remove the marker
         remove_button = QPushButton("Remove Markers", self)
-        remove_button.clicked.connect(self.remove_markers)
+        remove_button.clicked.connect(self.remove_marker)
         layout.addWidget(remove_button)
 
-        # to trigger polygon drawing
-        polygon_button = QPushButton("Get Polygon", self)
-        polygon_button.clicked.connect(self.get_polygon)
-        layout.addWidget(polygon_button)
+        # to annotate
+        add_button = QPushButton("Annotate", self)
+        add_button.clicked.connect(self.add_vertice)
+        layout.addWidget(add_button)
 
         # to trigger marker removal
         remove_polygons_button = QPushButton("Remove Polygons", self)
         remove_polygons_button.clicked.connect(self.remove_Polygons)
         layout.addWidget(remove_polygons_button)
 
-        panorama_button = QPushButton("Get Panorama", self)
-        panorama_button.clicked.connect(self.main_window.get_panorama)
-        layout.addWidget(panorama_button)
+        # to trigger polygon drawing
+        polygon_button = QPushButton("Get Polygon (NO)", self)
+        polygon_button.clicked.connect(self.get_polygon)
+        layout.addWidget(polygon_button)
 
         # to display the Folium map
         web_view = QWebEngineView()
@@ -75,10 +81,14 @@ class FoliumWidget(QWidget):
         self.findChild(QWebEngineView).page().runJavaScript(update_script)
         self.markers.append((lat, lng))
 
-    def remove_markers(self):
-        remove_script = "removeMarkers();"
+    def remove_marker(self):
+        remove_script = f"removeMarker();"
         self.findChild(QWebEngineView).page().runJavaScript(remove_script)
         self.markers = []
+
+    def add_vertice(self):
+        add_script = "annotate();"
+        self.findChild(QWebEngineView).page().runJavaScript(add_script)
 
     def remove_Polygons(self):
         remove_script = "removePolygons();"
@@ -98,9 +108,7 @@ class FoliumWidget(QWidget):
 
     def save_map_as_png(self):
         folder_path = "Output"
-        # Ensure the file extension is .png
         if not folder_path.lower().endswith(".png"):
             folder_path += ".png"
-        # Capture the current view of the map as PNG
         self.findChild(QWebEngineView).grab().save(folder_path)
         print(f"Map saved as PNG: {folder_path}")
