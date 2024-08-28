@@ -80,12 +80,14 @@
     <script>
       var markers = [];
       var polygons = [];
+      var vertices = [];
       var my_map = L.map("my_map", {
         center: [30.71979998667062, 76.72142742674824],
         crs: L.CRS.EPSG3857,
         zoom: 18,
         zoomControl: true,
         preferCanvas: false,
+        doubleClickZoom: false,
       });
 
       var osm_tile_layer = L.tileLayer(
@@ -159,47 +161,46 @@
       stamen_tile_layer.addTo(my_map);
       let coordinatesArray = [];
 
-      function addCoordinates(lat, lng) {
-        coordinatesArray.push({ lat, lng });
-      }
+      let clickTimeout = null;
+      const DOUBLE_CLICK_DELAY = 300;
 
       function newPoint(e) {
-        var redDot = L.circleMarker(e.latlng, {
-          radius: 5,
-          fillColor: "red",
-          color: "red",
-          weight: 1,
-          opacity: 1,
-          fillOpacity: 0.8,
-        }).addTo(my_map);
-
-        var lat = e.latlng.lat.toFixed(4),
-          lng = e.latlng.lng.toFixed(4);
-        redDot.bindPopup("Latitude: " + lat + "<br>Longitude: " + lng);
-
-        copyToClipboard("[" + lat + "," + lng + "]");
-        markers.push(redDot);
-        addCoordinates(lat, lng);
+        clearTimeout(clickTimeout);
+        clickTimeout = setTimeout(() => {
+          var redDot = L.circleMarker(e.latlng, {
+            radius: 2,
+            fillColor: "red",
+            color: "red",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8,
+          }).addTo(my_map);
+          var lat = e.latlng.lat.toFixed(4),
+            lng = e.latlng.lng.toFixed(4);
+          redDot.bindPopup("Latitude: " + lat + "<br>Longitude: " + lng);
+          copyToClipboard("[" + lat + "," + lng + "]");
+          vertices.push(redDot);
+          coordinatesArray.push({ lat, lng });
+        }, DOUBLE_CLICK_DELAY);
       }
 
-      // function newMarker(e) {
-      //   var new_mark = L.marker().setLatLng(e.latlng).addTo(my_map);
-      //   new_mark.dragging.enable();
-      //   new_mark.on("dblclick", function (e) {
-      //     my_map.removeLayer(new_mark);
-      //
-      //     markers = markers.filter((marker) => marker !== new_mark);
-      //   });
-      //   var lat = e.latlng.lat.toFixed(4),
-      //     lng = e.latlng.lng.toFixed(4);
-      //   new_mark.bindPopup("Latitude: " + lat + "<br>Longitude: " + lng);
-      //   copyToClipboard("[" + lat + "," + lng + "]");
-      //
-      //   markers.push(new_mark);
-      //   addCoordinates(lat, lng);
-      // }
+      function newMarker(e) {
+        clearTimeout(clickTimeout);
+        var new_mark = L.marker().setLatLng(e.latlng).addTo(my_map);
+        new_mark.dragging.enable();
+        new_mark.on("dblclick", function (e) {
+          my_map.removeLayer(new_mark);
+          markers = markers.filter((marker) => marker !== new_mark);
+        });
+        var lat = e.latlng.lat.toFixed(4),
+          lng = e.latlng.lng.toFixed(4);
+        new_mark.bindPopup("Latitude: " + lat + "<br>Longitude: " + lng);
+        copyToClipboard("[" + lat + "," + lng + "]");
+        markers.push(new_mark);
+      }
 
       my_map.on("click", newPoint);
+      my_map.on("dblclick", newMarker);
 
       function copyToClipboard(text) {
         var dummy = document.createElement("textarea");
@@ -224,32 +225,31 @@
         });
       }
 
-      function removeMarkers() {
+      function removeMarker() {
         markers.forEach((marker) => my_map.removeLayer(marker));
         markers = [];
+      }
+
+      function annotate() {
+        vertices.forEach((vertice) => my_map.removeLayer(vertice));
+        vertices = [];
+
         drawPolygon(coordinatesArray, "red", 50);
         coordinatesArray = [];
       }
 
       function drawPolygon(vertices, color, opacity) {
-        // Convert opacity to a valid Leaflet fillOpacity value
-        var fillOpacity = opacity / 100; // assuming opacity is in percentage
-
-        // Create a polygon with the given vertices and add it to the map
+        var fillOpacity = opacity / 100;
         var polygon = L.polygon(vertices, {
-          color: color, // Border color
-          fillColor: color, // Fill color
-          fillOpacity: fillOpacity, // Adjust the fill opacity as needed
+          color: color,
+          fillColor: color,
+          fillOpacity: fillOpacity,
         }).addTo(my_map);
-
-        // Add the new polygon to the polygons array
         polygons.push(polygon);
       }
 
       function removePolygons() {
-        // Remove all polygons from the map
         polygons.forEach((polygon) => my_map.removeLayer(polygon));
-        // Clear the polygons array
         polygons = [];
       }
     </script>
