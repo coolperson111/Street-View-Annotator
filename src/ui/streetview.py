@@ -2,7 +2,6 @@ import base64
 import math
 import os
 
-import numpy as np
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from PIL import Image, ImageDraw
@@ -112,13 +111,14 @@ class GLWidget(QGLWidget):
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
-            self.handle_left_button_press(event)
+            self.mouse_x, self.mouse_y = event.pos().x(), event.pos().y()
+            self.moving = True
         elif event.button() == QtCore.Qt.RightButton:
             self.handle_right_button_press(event)
 
-    def handle_left_button_press(self, event):
-        self.mouse_x, self.mouse_y = event.pos().x(), event.pos().y()
-        self.moving = True
+    def mouseReleaseEvent(self, event):
+        if event.button() == QtCore.Qt.LeftButton:
+            self.moving = False
 
     def handle_right_button_press(self, event):
         self.mouse_x, self.mouse_y = event.pos().x(), event.pos().y()
@@ -181,15 +181,6 @@ class GLWidget(QGLWidget):
 
     def calculate_new_coords(self, depth, direction):
         return get_new_coords(self.lat, self.lng, depth, int(direction))
-
-    def mouseReleaseEvent(self, event):
-        if event.button() == QtCore.Qt.LeftButton:
-            self.moving = False
-        elif event.button() == QtCore.Qt.RightButton:
-            try:
-                self.draw_polygon(self.markers_stack)
-            except:
-                print("more than markers required")
 
     def mouseMoveEvent(self, event):
         if self.moving:
@@ -266,29 +257,6 @@ class GLWidget(QGLWidget):
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
         self.update()
 
-    def draw_polygon(self, markers_stack):
-
-        draw = ImageDraw.Draw(self.image, "RGBA")  # 'RGBA' for transparency
-        draw.polygon(markers_stack, self.color)
-
-        glDeleteTextures(1, [self.texture])
-        self.texture = glGenTextures(1)
-        glBindTexture(GL_TEXTURE_2D, self.texture)
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            GL_RGB,
-            self.image_width,
-            self.image_height,
-            0,
-            GL_RGB,
-            GL_UNSIGNED_BYTE,
-            self.image.tobytes(),
-        )
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-        self.update()
-
     def save_image(self):
         """
         - Latitude
@@ -335,3 +303,26 @@ class GLWidget(QGLWidget):
         glMatrixMode(GL_PROJECTION)
         glPopMatrix()
         glMatrixMode(GL_MODELVIEW)
+
+    # def draw_polygon(self, markers_stack):
+    #
+    #     draw = ImageDraw.Draw(self.image, "RGBA")  # 'RGBA' for transparency
+    #     draw.polygon(markers_stack, self.color)
+    #
+    #     glDeleteTextures(1, [self.texture])
+    #     self.texture = glGenTextures(1)
+    #     glBindTexture(GL_TEXTURE_2D, self.texture)
+    #     glTexImage2D(
+    #         GL_TEXTURE_2D,
+    #         0,
+    #         GL_RGB,
+    #         self.image_width,
+    #         self.image_height,
+    #         0,
+    #         GL_RGB,
+    #         GL_UNSIGNED_BYTE,
+    #         self.image.tobytes(),
+    #     )
+    #     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+    #     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+    #     self.update()

@@ -35,30 +35,30 @@ class FoliumWidget(QWidget):
         panorama_button.clicked.connect(self.main_window.get_panorama)
         layout.addWidget(panorama_button)
 
+        # to trigger polygon drawing
+        add_button = QPushButton("Add Markers", self)
+        add_button.clicked.connect(self.add_marker)
+        layout.addWidget(add_button)
+
         # to remove the marker
         remove_button = QPushButton("Remove Markers", self)
         remove_button.clicked.connect(self.remove_marker)
         layout.addWidget(remove_button)
 
-        # to annotate
-        add_button = QPushButton("Annotate", self)
-        add_button.clicked.connect(self.add_vertice)
-        layout.addWidget(add_button)
-
-        # to trigger marker removal
-        remove_polygons_button = QPushButton("Remove Polygons", self)
-        remove_polygons_button.clicked.connect(self.remove_Polygons)
-        layout.addWidget(remove_polygons_button)
-
-        # to trigger polygon drawing
-        polygon_button = QPushButton("Get Polygon (NO)", self)
-        polygon_button.clicked.connect(self.get_polygon)
-        layout.addWidget(polygon_button)
-
         # to display the Folium map
         web_view = QWebEngineView()
         web_view.setHtml(open("src/ui/map_final.html").read())
         layout.addWidget(web_view)
+
+        # # to annotate
+        # add_button = QPushButton("Annotate", self)
+        # add_button.clicked.connect(self.add_vertice)
+        # layout.addWidget(add_button)
+        #
+        # # to trigger marker removal
+        # remove_polygons_button = QPushButton("Remove Polygons", self)
+        # remove_polygons_button.clicked.connect(self.remove_Polygons)
+        # layout.addWidget(remove_polygons_button)
 
     def update_map_with_input(self):
         save_image(
@@ -76,39 +76,40 @@ class FoliumWidget(QWidget):
             street=True,
         )
 
-    def add_marker(self, lat, lng):
-        update_script = f"updateMapWithCoordinates({lat}, {lng});"
-        self.findChild(QWebEngineView).page().runJavaScript(update_script)
-        self.markers.append((lat, lng))
+    def add_marker(self):
+        for lat, lng in self.gl_widget.coordinates_stack:
+            update_script = f"newTree({lat}, {lng});"
+            self.findChild(QWebEngineView).page().runJavaScript(update_script)
+            self.markers.append((lat, lng))
 
     def remove_marker(self):
         remove_script = f"removeMarker();"
         self.findChild(QWebEngineView).page().runJavaScript(remove_script)
         self.markers = []
 
-    def add_vertice(self):
-        add_script = "annotate();"
-        self.findChild(QWebEngineView).page().runJavaScript(add_script)
+    # def save_map_as_png(self):
+    #     folder_path = "Output"
+    #     if not folder_path.lower().endswith(".png"):
+    #         folder_path += ".png"
+    #     self.findChild(QWebEngineView).grab().save(folder_path)
+    #     print(f"Map saved as PNG: {folder_path}")
 
-    def remove_Polygons(self):
-        remove_script = "removePolygons();"
-        self.findChild(QWebEngineView).page().runJavaScript(remove_script)
-        self.Polygons = []
+    # def add_vertice(self):
+    #     add_script = "annotate();"
+    #     self.findChild(QWebEngineView).page().runJavaScript(add_script)
 
-    def get_polygon(self):
-        if len(self.gl_widget.coordinates_stack) >= 3:
-            polygon_vertices = ",".join(
-                [f"[{lat},{lng}]" for lat, lng in self.gl_widget.coordinates_stack]
-            )
-            draw_polygon_script = f"drawPolygon([{polygon_vertices}], '{self.gl_widget.map_color_name}', {self.gl_widget.map_transparency});"
-            self.findChild(QWebEngineView).page().runJavaScript(draw_polygon_script)
-            self.gl_widget.coordinates_stack = []
-        else:
-            print("At least 3 markers are required to draw a polygon.")
+    # def remove_Polygons(self):
+    #     remove_script = "removePolygons();"
+    #     self.findChild(QWebEngineView).page().runJavaScript(remove_script)
+    #     self.Polygons = []
 
-    def save_map_as_png(self):
-        folder_path = "Output"
-        if not folder_path.lower().endswith(".png"):
-            folder_path += ".png"
-        self.findChild(QWebEngineView).grab().save(folder_path)
-        print(f"Map saved as PNG: {folder_path}")
+    # def get_annotation(self):
+    #     if len(self.gl_widget.coordinates_stack) >= 3:
+    #         polygon_vertices = ",".join(
+    #             [f"[{lat},{lng}]" for lat, lng in self.gl_widget.coordinates_stack]
+    #         )
+    #         draw_polygon_script = f"drawPolygon([{polygon_vertices}], '{self.gl_widget.map_color_name}', {self.gl_widget.map_transparency});"
+    #         self.findChild(QWebEngineView).page().runJavaScript(draw_polygon_script)
+    #         self.gl_widget.coordinates_stack = []
+    #     else:
+    #         print("At least 3 markers are required to draw a polygon.")
