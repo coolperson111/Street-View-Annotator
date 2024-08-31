@@ -1,7 +1,9 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import (QColorDialog, QInputDialog, QLabel, QListWidget,
-                             QListWidgetItem, QPushButton, QSlider,
-                             QVBoxLayout)
+from PyQt5.QtWidgets import (QColorDialog, QInputDialog, QLabel, QLineEdit,
+                             QListWidget, QListWidgetItem, QPushButton,
+                             QSlider, QVBoxLayout, QWidget)
+
+from utils.processor import *
 
 
 class SidebarWidget(QtWidgets.QWidget):
@@ -64,6 +66,18 @@ class SidebarWidget(QtWidgets.QWidget):
         self.coordinates_list_widget = QListWidget()
         self.coordinates_list_widget.setSortingEnabled(False)
 
+        # Textbox for current Lat
+        lat_label = QLabel("Latitude:")
+        self.lat_display = QLineEdit()
+        self.lat_display.setText(str(self.gl_widget.lat))
+        self.lat_display.setStyleSheet("color: white;")
+
+        # Textbox for current Lng
+        lng_label = QLabel("Longitude:")
+        self.lng_display = QLineEdit()
+        self.lng_display.setText(str(self.gl_widget.lng))
+        self.lng_display.setStyleSheet("color: white;")
+
         layout.addWidget(stroke_label)
         layout.addWidget(self.stroke_slider)
         layout.addWidget(self.stroke_label_value)
@@ -77,8 +91,16 @@ class SidebarWidget(QtWidgets.QWidget):
         layout.addWidget(self.map_transparency_label_value)
         layout.addWidget(map_color_label)
         layout.addWidget(self.map_color_button)
+        layout.addWidget(lat_label)
+        layout.addWidget(self.lat_display)
+        layout.addWidget(lng_label)
+        layout.addWidget(self.lng_display)
         layout.addWidget(self.coordinates_list_widget)
         self.setLayout(layout)
+
+    def update_lat_lng(self, lat, lng):
+        self.lat_display.setText(str(lat))
+        self.lng_display.setText(str(lng))
 
     def on_stroke_width_change(self, value):
         self.stroke_label_value.setText(f"Current Width: {value}")
@@ -113,7 +135,11 @@ class SidebarWidget(QtWidgets.QWidget):
         self.map_color_button.setStyleSheet(f"background-color: {map_color.name()}")
 
     def update_coordinates_label(self):
-        self.update_coordinates_list()
+        # self.update_coordinates_list()
+        # lat = self.lat_display.text()
+        # lng = self.lng_display.text()
+        # self.gl_widget.set_current_coordinates(lat, lng)
+        pass
 
     def update_coordinates_list(self, First=True):
         self.coordinates_list_widget.clear()
