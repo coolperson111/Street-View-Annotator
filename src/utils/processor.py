@@ -15,7 +15,9 @@ def degrees_to_radians(degrees):
 
 
 def get_panorama_id(lat, long):
-    pano = streetview.find_panorama(lat, long)
+    pano = streetview.find_panorama(lat, long, radius=500)
+    if pano is None:
+        return None
     return str(pano.id)
 
 
@@ -38,6 +40,20 @@ def save_depth_map(pano):
     plt.close()
 
     return pano.depth.data, depth_map_path, depth_image_path
+
+
+def process_location(lat, long):
+    pano_id = get_panorama_id(lat, long)
+    if pano_id is None:
+        return None, None, None, None, None
+    panorma, pano = download_panorama_image_and_depth(pano_id)
+
+    heading_degrees = radians_to_degrees(pano.heading)
+    print("Permalink:", pano.permalink(heading=heading_degrees, pitch=90))
+    if pano.depth:
+        depth_map, depth_map_path, depth_image_path = save_depth_map(pano)
+    # print('Heading:',heading_degrees)
+    return panorma, depth_map, heading_degrees, pano.lat, pano.lon
 
 
 # def generate_heading_pitch_arrays(pano_id, width=512, height=256, center_heading=0):
@@ -76,25 +92,3 @@ def save_depth_map(pano):
 #     plt.savefig(headings_path)
 #     plt.close()
 #     return headings_path
-
-
-def process_location(lat, long):
-    pano_id = get_panorama_id(lat, long)
-    panorma, pano = download_panorama_image_and_depth(pano_id)
-
-    # print("ID:", pano.id)
-    # print("Latitude, Longitude:", pano.lat, pano.lon)
-    # print("Date:", pano.date)
-    # print("Heading, Pitch, Roll:", pano.heading, pano.pitch, pano.roll)
-
-    # Assuming there is a name attribute for the panorama
-    # pano_name = "Panorama Name"  # Replace this with the actual attribute name
-    # print("Name:", pano_name)
-
-    # Assuming radians_to_degrees is a function that converts radians to degrees
-    heading_degrees = radians_to_degrees(pano.heading)
-    print("Permalink:", pano.permalink(heading=heading_degrees, pitch=90))
-    if pano.depth:
-        depth_map, depth_map_path, depth_image_path = save_depth_map(pano)
-    # print('Heading:',heading_degrees)
-    return panorma, depth_map, heading_degrees, pano.lat, pano.lon

@@ -180,8 +180,8 @@
           my_map.removeLayer(new_mark);
           markers = markers.filter((marker) => marker !== new_mark);
         });
-        var lat = e.latlng.lat.toFixed(4),
-          lng = e.latlng.lng.toFixed(4);
+        var lat = e.latlng.lat,
+          lng = e.latlng.lng;
         new_mark.bindPopup("Latitude: " + lat + "<br>Longitude: " + lng);
         copyToClipboard("[" + lat + "," + lng + "]");
         markers.push(new_mark);

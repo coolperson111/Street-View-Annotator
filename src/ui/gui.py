@@ -60,9 +60,14 @@ class MainWindow(QMainWindow):
             self.sidebar_widget.gl_widget = self.gl_widget
 
     def get_panorama(self):
+        if self.sidebar_widget:
+            self.sidebar_widget.update_lat_lng(self.clipboard_lat, self.clipboard_lng)
         self.image, self.depth, self.heading, self.latitude, self.longitude = (
             process_location(self.clipboard_lat, self.clipboard_lng)
         )
+
+        if self.image is None:
+            return
 
         # Remove and recreate GL widget
         self.central_layout.removeWidget(self.gl_widget)
