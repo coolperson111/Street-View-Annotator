@@ -80,7 +80,7 @@
     <script>
       var markers = [];
       var polygons = [];
-      var vertices = [];
+      var trees = [];
       var my_map = L.map("my_map", {
         center: [30.71979998667062, 76.72142742674824],
         crs: L.CRS.EPSG3857,
@@ -159,33 +159,21 @@
       );
 
       stamen_tile_layer.addTo(my_map);
-      let coordinatesArray = [];
 
-      let clickTimeout = null;
-      const DOUBLE_CLICK_DELAY = 300;
-
-      function newPoint(e) {
-        clearTimeout(clickTimeout);
-        clickTimeout = setTimeout(() => {
-          var redDot = L.circleMarker(e.latlng, {
-            radius: 2,
-            fillColor: "red",
-            color: "red",
-            weight: 1,
-            opacity: 1,
-            fillOpacity: 0.8,
-          }).addTo(my_map);
-          var lat = e.latlng.lat.toFixed(4),
-            lng = e.latlng.lng.toFixed(4);
-          redDot.bindPopup("Latitude: " + lat + "<br>Longitude: " + lng);
-          copyToClipboard("[" + lat + "," + lng + "]");
-          vertices.push(redDot);
-          coordinatesArray.push({ lat, lng });
-        }, DOUBLE_CLICK_DELAY);
+      function newTree(lat, lng) {
+        var redDot = L.circleMarker([lat, lng], {
+          radius: 2,
+          fillColor: "red",
+          color: "red",
+          weight: 1,
+          opacity: 1,
+          fillOpacity: 0.8,
+        }).addTo(my_map);
+        redDot.bindPopup("Latitude: " + lat + "<br>Longitude: " + lng);
+        trees.push(redDot);
       }
 
       function newMarker(e) {
-        clearTimeout(clickTimeout);
         var new_mark = L.marker().setLatLng(e.latlng).addTo(my_map);
         new_mark.dragging.enable();
         new_mark.on("dblclick", function (e) {
@@ -199,7 +187,6 @@
         markers.push(new_mark);
       }
 
-      my_map.on("click", newPoint);
       my_map.on("dblclick", newMarker);
 
       function copyToClipboard(text) {
@@ -211,47 +198,33 @@
         document.body.removeChild(dummy);
       }
 
-      function updateMapWithCoordinates(lat, lng) {
-        var new_mark = L.marker([lat, lng]).addTo(my_map);
-        new_mark.bindPopup("Latitude: " + lat + "<br>Longitude: " + lng);
-
-        my_map.setView([lat, lng], 12);
-
-        markers.push(new_mark);
-
-        new_mark.on("dblclick", function (e) {
-          my_map.removeLayer(new_mark);
-          markers = markers.filter((marker) => marker !== new_mark);
-        });
-      }
-
       function removeMarker() {
         markers.forEach((marker) => my_map.removeLayer(marker));
         markers = [];
       }
 
-      function annotate() {
-        vertices.forEach((vertice) => my_map.removeLayer(vertice));
-        vertices = [];
+      // function annotate() {
+      //   vertices.forEach((vertice) => my_map.removeLayer(vertice));
+      //   vertices = [];
+      //
+      //   drawPolygon(coordinatesArray, "red", 50);
+      //   coordinatesArray = [];
+      // }
 
-        drawPolygon(coordinatesArray, "red", 50);
-        coordinatesArray = [];
-      }
+      // function drawPolygon(vertices, color, opacity) {
+      //   var fillOpacity = opacity / 100;
+      //   var polygon = L.polygon(vertices, {
+      //     color: color,
+      //     fillColor: color,
+      //     fillOpacity: fillOpacity,
+      //   }).addTo(my_map);
+      //   polygons.push(polygon);
+      // }
 
-      function drawPolygon(vertices, color, opacity) {
-        var fillOpacity = opacity / 100;
-        var polygon = L.polygon(vertices, {
-          color: color,
-          fillColor: color,
-          fillOpacity: fillOpacity,
-        }).addTo(my_map);
-        polygons.push(polygon);
-      }
-
-      function removePolygons() {
-        polygons.forEach((polygon) => my_map.removeLayer(polygon));
-        polygons = [];
-      }
+      // function removePolygons() {
+      //   polygons.forEach((polygon) => my_map.removeLayer(polygon));
+      //   polygons = [];
+      // }
     </script>
   </body>
 </html>
