@@ -2,6 +2,7 @@ import base64
 import math
 import os
 
+import numpy as np
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from PIL import Image, ImageDraw
@@ -22,6 +23,7 @@ class GLWidget(QGLWidget):
 
         self.lat, self.lng = lat, lng
         self.image = image
+        self.original_image = image.copy()
         self.depth = depth
         self.image_width, self.image_height = self.image.size
         self.output_directory = "Output"
@@ -95,17 +97,24 @@ class GLWidget(QGLWidget):
         glMatrixMode(GL_MODELVIEW)
 
     def keyPressEvent(self, event):
-        speed = 5
-        if event.key() == QtCore.Qt.Key_Up:
+        speed = 3
+        if event.key() == QtCore.Qt.Key_Up or event.key() == QtCore.Qt.Key_W:
             print(self.pitch)
             self.pitch = self.pitch - speed
-        elif event.key() == QtCore.Qt.Key_Down:
+        elif event.key() == QtCore.Qt.Key_Down or event.key() == QtCore.Qt.Key_S:
             self.pitch = self.pitch + speed
-        elif event.key() == QtCore.Qt.Key_Left:
+        elif event.key() == QtCore.Qt.Key_Left or event.key() == QtCore.Qt.Key_A:
             self.yaw = 360 if self.yaw == 0 else self.yaw
             self.yaw = (self.yaw - speed) % 360
-        elif event.key() == QtCore.Qt.Key_Right:
+        elif event.key() == QtCore.Qt.Key_Right or event.key() == QtCore.Qt.Key_D:
             self.yaw = (self.yaw + speed) % 360
+        elif event.key() == QtCore.Qt.Key_Z:
+            # Write code to undo previous marking
+            (image_pixel_x, image_pixel_y) = self.markers_stack.pop()
+            (lat, lng) = self.coordinates_stack.pop()
+            self.erase_point(image_pixel_x, image_pixel_y)
+            self.sidebar_widget.update_coordinates_label()
+            print("undo")
         self.update()
         self.moving = False
 
@@ -239,6 +248,53 @@ class GLWidget(QGLWidget):
             ],
             fill=point_color,
         )
+        glDeleteTextures(1, [self.texture])
+        self.texture = glGenTextures(1)
+        glBindTexture(GL_TEXTURE_2D, self.texture)
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_RGB,
+            self.image_width,
+            self.image_height,
+            0,
+            GL_RGB,
+            GL_UNSIGNED_BYTE,
+            self.image.tobytes(),
+        )
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+        self.update()
+
+    def erase_point(self, x, y):
+        # Create a mask for the area to be erased
+        mask = Image.new("L", self.image.size, 0)
+        draw = ImageDraw.Draw(mask)
+        half_size = self.stroke_width
+        center = (x, y)
+        radius = half_size
+        draw.ellipse(
+            [
+                (center[0] - radius, center[1] - radius),
+                (center[0] + radius, center[1] + radius),
+            ],
+            fill=255,
+        )
+
+        # Convert mask to numpy array
+        mask_array = np.array(mask)
+
+        # Get the original image data
+        original_array = np.array(self.original_image)
+        current_array = np.array(self.image)
+
+        # Replace the area in the current image with the original image data
+        current_array[mask_array == 255] = original_array[mask_array == 255]
+
+        # Convert back to PIL Image
+        self.image = Image.fromarray(current_array)
+
+        # Update OpenGL texture
         glDeleteTextures(1, [self.texture])
         self.texture = glGenTextures(1)
         glBindTexture(GL_TEXTURE_2D, self.texture)
