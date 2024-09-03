@@ -81,6 +81,7 @@
       var markers = [];
       var polygons = [];
       var trees = [];
+      var pos = null;
       var my_map = L.map("my_map", {
         center: [30.71979998667062, 76.72142742674824],
         crs: L.CRS.EPSG3857,
@@ -89,6 +90,7 @@
         preferCanvas: false,
         doubleClickZoom: false,
       });
+      position(30.71979998667062, 76.72142742674824, 180);
 
       var osm_tile_layer = L.tileLayer(
         "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -96,8 +98,8 @@
           attribution:
             '\u0026copy; \u003ca href="https://www.openstreetmap.org/copyright"\u003eOpenStreetMap\u003c/a\u003e contributors',
           detectRetina: false,
-          maxNativeZoom: 19,
-          maxZoom: 19,
+          maxNativeZoom: 20,
+          maxZoom: 20,
           minZoom: 0,
           noWrap: false,
           opacity: 1,
@@ -113,8 +115,8 @@
         {
           attribution: "Esri",
           detectRetina: false,
-          maxNativeZoom: 18,
-          maxZoom: 18,
+          maxNativeZoom: 19,
+          maxZoom: 19,
           minZoom: 0,
           noWrap: false,
           opacity: 1,
@@ -130,8 +132,8 @@
         {
           attribution: "Esri",
           detectRetina: false,
-          maxNativeZoom: 18,
-          maxZoom: 18,
+          maxNativeZoom: 19,
+          maxZoom: 19,
           minZoom: 0,
           noWrap: false,
           opacity: 1,
@@ -148,8 +150,8 @@
           attribution:
             'Map data \u00a9 \u003ca href="http://www.openstreetmap.org/copyright"\u003eOpenStreetMap\u003c/a\u003e contributors, \u003ca href="http://www.stamen.com"\u003eStamen Design\u003c/a\u003e',
           detectRetina: false,
-          maxNativeZoom: 18,
-          maxZoom: 18,
+          maxNativeZoom: 19,
+          maxZoom: 19,
           minZoom: 0,
           noWrap: false,
           opacity: 1,
@@ -188,6 +190,34 @@
       }
 
       my_map.on("dblclick", newMarker);
+
+      function position(lat, lng, yaw) {
+        var iconHtml = `
+        <div style="
+            background-color: blue;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid white;">
+            <i class="fa fa-arrow-up" style="transform: rotate(${yaw}deg); font-size: 12px; color: white;"></i>
+        </div>`;
+
+        var icon = L.divIcon({
+          html: iconHtml,
+          className: "custom-marker",
+          iconSize: [30, 30],
+          iconAnchor: [15, 15],
+        });
+        if (pos) {
+          my_map.removeLayer(pos);
+        }
+
+        var marker = L.marker([lat, lng], { icon: icon }).addTo(my_map);
+        pos = marker;
+      }
 
       function copyToClipboard(text) {
         var dummy = document.createElement("textarea");

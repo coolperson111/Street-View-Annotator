@@ -22,8 +22,8 @@ class FoliumWidget(QWidget):
         self.setLayout(layout)
 
         # for entering coordinates
-        self.coord_input = QLineEdit(self)
-        layout.addWidget(self.coord_input)
+        # self.coord_input = QLineEdit(self)
+        # layout.addWidget(self.coord_input)
 
         # to trigger the coordinate update
         update_button = QPushButton("Save Map", self)
