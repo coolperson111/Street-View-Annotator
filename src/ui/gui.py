@@ -2,6 +2,7 @@ import numpy as np
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from PyQt5 import QtGui
+from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QMainWindow, QWidget
 
 from ui.map import FoliumWidget
@@ -44,7 +45,7 @@ class MainWindow(QMainWindow):
         self.central_widget.setLayout(self.central_layout)
         self.setCentralWidget(self.central_widget)
 
-    def create_gl_widget(self):
+    def create_gl_widget(self, yaw=0):
         self.gl_widget = GLWidget(
             self,
             image=self.image,
@@ -53,31 +54,40 @@ class MainWindow(QMainWindow):
             sidebar_widget=None,
             lat=self.latitude,
             lng=self.longitude,
+            yaw=yaw,
         )
         self.gl_widget.sidebar_widget = self.sidebar_widget
         if self.folium_widget is not None and self.sidebar_widget is not None:
             self.folium_widget.gl_widget = self.gl_widget
             self.sidebar_widget.gl_widget = self.gl_widget
 
-    def get_panorama(self):
+    def get_panorama(self, lat=None, lng=None, yaw=0):
+        if lat is None or lng is None:
+            lat = self.clipboard_lat
+            lng = self.clipboard_lng
+
         if self.sidebar_widget:
-            self.sidebar_widget.update_lat_lng(self.clipboard_lat, self.clipboard_lng)
+            self.sidebar_widget.update_lat_lng(lat, lng)
+
         self.image, self.depth, self.heading, self.latitude, self.longitude = (
-            process_location(self.clipboard_lat, self.clipboard_lng)
+            process_location(lat, lng)
         )
 
         if self.image is None:
             return
 
-        # Remove and recreate GL widget
+        self.update_position(lat, lng, yaw)
+
         self.central_layout.removeWidget(self.gl_widget)
         self.gl_widget.deleteLater()
-        self.create_gl_widget()
-        # Insert the updated GL widget back into the layout
+        self.create_gl_widget(yaw=yaw)
         self.centralWidget().layout().insertWidget(1, self.gl_widget, stretch=1)
+        self.folium_widget.markers.append((lat, lng))
 
-        # Update Folium widget with the new markers
-        self.folium_widget.markers.append((self.clipboard_lat, self.clipboard_lng))
+    def update_position(self, lat, lng, yaw):
+        self.folium_widget.findChild(QWebEngineView).page().runJavaScript(
+            f"position({lat}, {lng}, {yaw+180});"
+        )
 
     def on_clipboard_change(self):
         mime_data = self.clipboard.mimeData()

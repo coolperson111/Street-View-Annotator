@@ -16,8 +16,9 @@ from utils.utils import get_new_coords
 
 
 class GLWidget(QGLWidget):
-    def __init__(self, parent, sidebar_widget, image, depth, heading, lat, lng):
+    def __init__(self, parent, sidebar_widget, image, depth, heading, lat, lng, yaw):
         super().__init__(parent)
+        self.window = parent
 
         self.setFocusPolicy(Qt.StrongFocus)
 
@@ -27,7 +28,7 @@ class GLWidget(QGLWidget):
         self.depth = depth
         self.image_width, self.image_height = self.image.size
         self.output_directory = "Output"
-        self.yaw = 270
+        self.yaw = yaw
         self.heading = heading
         self.pitch = 0
         self.prev_dx = 0
@@ -99,22 +100,22 @@ class GLWidget(QGLWidget):
     def keyPressEvent(self, event):
         speed = 3
         if event.key() == QtCore.Qt.Key_Up or event.key() == QtCore.Qt.Key_W:
-            print(self.pitch)
             self.pitch = self.pitch - speed
         elif event.key() == QtCore.Qt.Key_Down or event.key() == QtCore.Qt.Key_S:
             self.pitch = self.pitch + speed
         elif event.key() == QtCore.Qt.Key_Left or event.key() == QtCore.Qt.Key_A:
-            self.yaw = 360 if self.yaw == 0 else self.yaw
+            self.yaw = 360 if self.yaw <= 0 else self.yaw
             self.yaw = (self.yaw - speed) % 360
         elif event.key() == QtCore.Qt.Key_Right or event.key() == QtCore.Qt.Key_D:
             self.yaw = (self.yaw + speed) % 360
         elif event.key() == QtCore.Qt.Key_Z:
-            # Write code to undo previous marking
             (image_pixel_x, image_pixel_y) = self.markers_stack.pop()
             (lat, lng) = self.coordinates_stack.pop()
             self.erase_point(image_pixel_x, image_pixel_y)
             self.sidebar_widget.update_coordinates_label()
-            print("undo")
+        elif event.key() == QtCore.Qt.Key_J:
+            lat, lng = move_in_heading(self.lat, self.lng, self.yaw + 180)
+            self.window.get_panorama(lat, lng, self.yaw)
         self.update()
         self.moving = False
 

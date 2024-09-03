@@ -1,17 +1,9 @@
+from math import asin, atan2, cos, degrees, radians, sin
+
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 from streetlevel import streetview
-
-
-def radians_to_degrees(radians):
-    degrees = radians * (180 / np.pi)
-    return degrees
-
-
-def degrees_to_radians(degrees):
-    radians = degrees * (np.pi / 180)
-    return radians
 
 
 def get_panorama_id(lat, long):
@@ -19,6 +11,34 @@ def get_panorama_id(lat, long):
     if pano is None:
         return None
     return str(pano.id)
+
+
+def move_in_heading(lat, lon, heading, distance=0.01):
+    # Earth radius in kilometers
+    R = 6371.0
+
+    # Convert heading to radians
+    heading_rad = radians(heading)
+
+    # Convert latitude and longitude to radians
+    lat_rad = radians(lat)
+    lon_rad = radians(lon)
+
+    # Calculate the new latitude and longitude
+    new_lat_rad = asin(
+        sin(lat_rad) * cos(distance / R)
+        + cos(lat_rad) * sin(distance / R) * cos(heading_rad)
+    )
+    new_lon_rad = lon_rad + atan2(
+        sin(heading_rad) * sin(distance / R) * cos(lat_rad),
+        cos(distance / R) - sin(lat_rad) * sin(new_lat_rad),
+    )
+
+    # Convert new coordinates from radians to degrees
+    new_lat = degrees(new_lat_rad)
+    new_lon = degrees(new_lon_rad)
+
+    return new_lat, new_lon
 
 
 def download_panorama_image_and_depth(pano_id):
@@ -48,7 +68,7 @@ def process_location(lat, long):
         return None, None, None, None, None
     panorma, pano = download_panorama_image_and_depth(pano_id)
 
-    heading_degrees = radians_to_degrees(pano.heading)
+    heading_degrees = degrees(pano.heading)
     print("Permalink:", pano.permalink(heading=heading_degrees, pitch=90))
     if pano.depth:
         depth_map, depth_map_path, depth_image_path = save_depth_map(pano)
