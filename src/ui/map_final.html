@@ -162,15 +162,34 @@
 
       stamen_tile_layer.addTo(my_map);
 
+      // function newTree(lat, lng) {
+      //   var redDot = L.circleMarker([lat, lng], {
+      //     radius: 2,
+      //     fillColor: "red",
+      //     color: "red",
+      //     weight: 1,
+      //     opacity: 1,
+      //     fillOpacity: 0.8,
+      //   }).addTo(my_map);
+      //   redDot.bindPopup("Latitude: " + lat + "<br>Longitude: " + lng);
+      //   trees.push(redDot);
+      // }
       function newTree(lat, lng) {
-        var redDot = L.circleMarker([lat, lng], {
-          radius: 2,
-          fillColor: "red",
-          color: "red",
-          weight: 1,
-          opacity: 1,
-          fillOpacity: 0.8,
+        var redDotIcon = L.divIcon({
+          className: "custom-red-dot",
+          iconSize: [6, 6],
+          html: '<div style="background-color: red; border-radius: 50%; width: 9px; height: 9px;"></div>',
+        });
+
+        var redDot = L.marker([lat, lng], {
+          icon: redDotIcon,
         }).addTo(my_map);
+        redDot.dragging.enable();
+
+        redDot.on("dblclick", function (e) {
+          my_map.removeLayer(redDot);
+          trees = trees.filter((tree) => tree !== redDot);
+        });
         redDot.bindPopup("Latitude: " + lat + "<br>Longitude: " + lng);
         trees.push(redDot);
       }
