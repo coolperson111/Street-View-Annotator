@@ -11,8 +11,7 @@ from PyQt5.QtCore import QPoint, Qt
 from PyQt5.QtGui import QCursor
 from PyQt5.QtOpenGL import QGLWidget
 
-from utils.processor import *
-from utils.utils import get_new_coords
+from utils.processor import move_in_heading
 
 
 class GLWidget(QGLWidget):
@@ -150,7 +149,9 @@ class GLWidget(QGLWidget):
             print(
                 f"depth = {depth}, Distance = {distance}, Heading = {self.heading}, Direction = {int(self.direction)}"
             )
-            lat, lng = self.calculate_new_coords(depth, self.direction)
+            lat, lng = move_in_heading(
+                self.lat, self.lng, int(self.direction), depth / 1000
+            )
             self.draw_point(image_pixel_x, image_pixel_y)
             self.markers_stack.append((image_pixel_x, image_pixel_y))
             self.coordinates_stack.append((lat, lng))
@@ -180,17 +181,11 @@ class GLWidget(QGLWidget):
         index_x = int(image_pixel_x * (self.depth.shape[1] / self.image_width)) * (-1)
         return index_y, index_x
 
-    def calculate_distance(self, depth, cal_pitch):
-        return depth * math.sin((180 - cal_pitch) / 360)
-
     def calculate_direction(self, cal_yaw):
         direction = (self.yaw) - 270 + self.heading
         if direction < 0:
             direction += 360
         return direction
-
-    def calculate_new_coords(self, depth, direction):
-        return get_new_coords(self.lat, self.lng, depth, int(direction))
 
     def mouseMoveEvent(self, event):
         if self.moving:
