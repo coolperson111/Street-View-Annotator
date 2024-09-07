@@ -2,7 +2,6 @@ from math import asin, atan2, cos, degrees, radians, sin
 
 import matplotlib.pyplot as plt
 import numpy as np
-from PIL import Image
 from streetlevel import streetview
 
 

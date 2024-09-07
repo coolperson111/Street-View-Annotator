@@ -1,33 +1,98 @@
 import base64
+import math
 import os
-from math import cos, degrees, radians, sin
 
-from PyQt5.QtWebEngineWidgets import QWebEngineView
+# def get_new_coords(lat, lon, distance, direction):
+#     earth_radius = 6378137  # meters
+#
+#     # Convert latitude and longitude from degrees to radians
+#     lat_rad = radians(lat)
+#     lon_rad = radians(lon)
+#
+#     # Convert direction from degrees to radians
+#     direction_rad = radians(direction)
+#
+#     # Calculate new latitude
+#     new_lat_rad = lat_rad + (distance / earth_radius) * cos(direction_rad)
+#
+#     # Calculate new longitude
+#     new_lon_rad = lon_rad + (distance / earth_radius) * sin(direction_rad) / cos(
+#         lat_rad
+#     )
+#
+#     # Convert new latitude and longitude back to degrees
+#     new_lat = degrees(new_lat_rad)
+#     new_lon = degrees(new_lon_rad)
+#
+#     return new_lat, new_lon
 
 
-def get_new_coords(lat, lon, distance, direction):
-    earth_radius = 6378137  # meters
+def calculate_distance_and_direction(depth, cal_pitch, cal_yaw, heading):
+    distance = depth * math.sin((180 - cal_pitch) / 360)
+    direction = calculate_direction(cal_yaw, heading)
+    return distance, direction
 
-    # Convert latitude and longitude from degrees to radians
-    lat_rad = radians(lat)
-    lon_rad = radians(lon)
 
-    # Convert direction from degrees to radians
-    direction_rad = radians(direction)
+def screen_to_pixel_coordinates(
+    mouse_x, mouse_y, image_width, image_height, width, height
+):
+    pixel_x = int(mouse_x / width * image_width)
+    pixel_y = int((height - mouse_y) / height * image_height)
+    return pixel_x, pixel_y
 
-    # Calculate new latitude
-    new_lat_rad = lat_rad + (distance / earth_radius) * cos(direction_rad)
 
-    # Calculate new longitude
-    new_lon_rad = lon_rad + (distance / earth_radius) * sin(direction_rad) / cos(
-        lat_rad
+def calculate_image_pixel_coordinates(cal_yaw, cal_pitch, image_width, image_height):
+    image_pixel_x = cal_yaw * (image_width / 360)
+    image_pixel_y = cal_pitch * (image_height / 180)
+    return image_pixel_x, image_pixel_y
+
+
+def calculate_depth_indices(
+    image_pixel_x, image_pixel_y, depth, image_width, image_height
+):
+    index_y = int(image_pixel_y * (depth.shape[0] / image_height))
+    index_x = int(image_pixel_x * (depth.shape[1] / image_width)) * (-1)
+    return index_y, index_x
+
+
+def calculate_direction(yaw, heading):
+    direction = yaw - 270 + heading
+    if direction < 0:
+        direction += 360
+    return direction
+
+
+def calculate(
+    mouse_x,
+    mouse_y,
+    yaw,
+    pitch,
+    depth,
+    image_width,
+    image_height,
+    width,
+    height,
+    heading,
+):
+    pixel_x, pixel_y = screen_to_pixel_coordinates(
+        mouse_x, mouse_y, image_width, image_height, width, height
+    )
+    heading_offset = 0 - 270
+    cal_yaw = (yaw - heading_offset) % 360
+    cal_pitch = (pitch + 90) % 180
+    image_pixel_x, image_pixel_y = calculate_image_pixel_coordinates(
+        cal_yaw, cal_pitch, image_width, image_height
+    )
+    index_y, index_x = calculate_depth_indices(
+        image_pixel_x, image_pixel_y, depth, image_width, image_height
+    )
+    depth = depth[index_y][index_x]
+
+    distance, direction = calculate_distance_and_direction(
+        depth, cal_pitch, cal_yaw, heading
     )
 
-    # Convert new latitude and longitude back to degrees
-    new_lat = degrees(new_lat_rad)
-    new_lon = degrees(new_lon_rad)
-
-    return new_lat, new_lon
+    return distance, direction, image_pixel_x, image_pixel_y, depth
 
 
 def save_image(

@@ -1,5 +1,4 @@
 import base64
-import math
 import os
 
 import numpy as np
@@ -12,6 +11,7 @@ from PyQt5.QtGui import QCursor
 from PyQt5.QtOpenGL import QGLWidget
 
 from utils.processor import move_in_heading
+from utils.utils import calculate
 
 
 class GLWidget(QGLWidget):
@@ -131,18 +131,18 @@ class GLWidget(QGLWidget):
 
     def handle_right_button_press(self, event):
         self.mouse_x, self.mouse_y = event.pos().x(), event.pos().y()
-        pixel_x, pixel_y = self.screen_to_pixel_coordinates()
-        heading_offset = 0 - 270
-        cal_yaw = (self.yaw - heading_offset) % 360
-        cal_pitch = (self.pitch + 90) % 180
-        image_pixel_x, image_pixel_y = self.calculate_image_pixel_coordinates(
-            cal_yaw, cal_pitch, pixel_x, pixel_y
-        )
-        index_y, index_x = self.calculate_depth_indices(image_pixel_x, image_pixel_y)
-        depth = self.depth[index_y][index_x]
 
-        distance, self.direction = self.calculate_distance_and_direction(
-            depth, cal_pitch, cal_yaw
+        distance, self.direction, image_pixel_x, image_pixel_y, depth = calculate(
+            self.mouse_x,
+            self.mouse_y,
+            self.yaw,
+            self.pitch,
+            self.depth,
+            self.image_width,
+            self.image_height,
+            self.width(),
+            self.height(),
+            self.heading,
         )
 
         if depth > 0 and distance > 0:
@@ -158,34 +158,6 @@ class GLWidget(QGLWidget):
             self.sidebar_widget.update_coordinates_label()
         else:
             print("Inf")
-
-    def calculate_distance_and_direction(self, depth, cal_pitch, cal_yaw):
-        distance = depth * math.sin((180 - cal_pitch) / 360)
-        direction = self.calculate_direction(cal_yaw)
-        return distance, direction
-
-    def screen_to_pixel_coordinates(self):
-        pixel_x = int(self.mouse_x / self.width() * self.image_width)
-        pixel_y = int(
-            (self.height() - self.mouse_y) / self.height() * self.image_height
-        )
-        return pixel_x, pixel_y
-
-    def calculate_image_pixel_coordinates(self, cal_yaw, cal_pitch, pixel_x, pixel_y):
-        image_pixel_x = cal_yaw * (self.image_width / 360)
-        image_pixel_y = cal_pitch * (self.image_height / 180)
-        return image_pixel_x, image_pixel_y
-
-    def calculate_depth_indices(self, image_pixel_x, image_pixel_y):
-        index_y = int(image_pixel_y * (self.depth.shape[0] / self.image_height))
-        index_x = int(image_pixel_x * (self.depth.shape[1] / self.image_width)) * (-1)
-        return index_y, index_x
-
-    def calculate_direction(self, cal_yaw):
-        direction = (self.yaw) - 270 + self.heading
-        if direction < 0:
-            direction += 360
-        return direction
 
     def mouseMoveEvent(self, event):
         if self.moving:
