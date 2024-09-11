@@ -2,30 +2,6 @@ import base64
 import math
 import os
 
-# def get_new_coords(lat, lon, distance, direction):
-#     earth_radius = 6378137  # meters
-#
-#     # Convert latitude and longitude from degrees to radians
-#     lat_rad = radians(lat)
-#     lon_rad = radians(lon)
-#
-#     # Convert direction from degrees to radians
-#     direction_rad = radians(direction)
-#
-#     # Calculate new latitude
-#     new_lat_rad = lat_rad + (distance / earth_radius) * cos(direction_rad)
-#
-#     # Calculate new longitude
-#     new_lon_rad = lon_rad + (distance / earth_radius) * sin(direction_rad) / cos(
-#         lat_rad
-#     )
-#
-#     # Convert new latitude and longitude back to degrees
-#     new_lat = degrees(new_lat_rad)
-#     new_lon = degrees(new_lon_rad)
-#
-#     return new_lat, new_lon
-
 
 def calculate_distance_and_direction(depth, cal_pitch, cal_yaw, heading):
     distance = depth * math.sin((180 - cal_pitch) / 360)
@@ -89,7 +65,7 @@ def calculate(
     depth = depth[index_y][index_x]
 
     distance, direction = calculate_distance_and_direction(
-        depth, cal_pitch, cal_yaw, heading
+        depth, cal_pitch, yaw, heading
     )
 
     return distance, direction, image_pixel_x, image_pixel_y, depth

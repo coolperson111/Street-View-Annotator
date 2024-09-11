@@ -150,7 +150,7 @@ class GLWidget(QGLWidget):
                 f"depth = {depth}, Distance = {distance}, Heading = {self.heading}, Direction = {int(self.direction)}"
             )
             lat, lng = move_in_heading(
-                self.lat, self.lng, int(self.direction), depth / 1000
+                self.lat, self.lng, int(self.direction), distance / 1000
             )
             self.draw_point(image_pixel_x, image_pixel_y)
             self.markers_stack.append((image_pixel_x, image_pixel_y))
