@@ -181,7 +181,10 @@
           html: '<div style="background-color: red; border-radius: 50%; width: 9px; height: 9px;"></div>',
         });
 
-        var redDot = L.marker([lat, lng], {
+        var del_lat = 0.00002252;
+        var del_lon = -0.00005325;
+
+        var redDot = L.marker([lat + del_lat, lng + del_lon], {
           icon: redDotIcon,
         }).addTo(my_map);
         redDot.dragging.enable();
