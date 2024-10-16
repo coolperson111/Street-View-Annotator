@@ -1,3 +1,5 @@
+import math
+
 from PyQt5.QtCore import Qt
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWidgets import (QColorDialog, QGridLayout, QHBoxLayout,
@@ -33,7 +35,7 @@ class FoliumWidget(QWidget):
 
         # to trigger the coordinate update
         update_button = QPushButton("Save Map", self)
-        update_button.clicked.connect(self.update_map_with_input)
+        update_button.clicked.connect(self.save_map_with_input)
         button_layout.addWidget(update_button, 0, 0)
 
         # to get the panorama
@@ -111,7 +113,7 @@ class FoliumWidget(QWidget):
         # remove_polygons_button.clicked.connect(self.remove_Polygons)
         # layout.addWidget(remove_polygons_button)
 
-    def update_map_with_input(self):
+    def save_map_with_input(self):
         save_image(
             self.findChild(QWebEngineView),
             self.main_window.latitude,
@@ -129,25 +131,37 @@ class FoliumWidget(QWidget):
 
     def on_lat_slider_change(self):
         value = self.lat_offset_slider.value()
+        delta = value - self.lat_offset
         self.lat_offset = value
         self.lat_offset_input.setText(str(value))
+        self.update_map(delta, 0)
 
     def on_lng_slider_change(self):
         value = self.lng_offset_slider.value()
+        delta = value - self.lng_offset
         self.lng_offset = value
         self.lng_offset_input.setText(str(value))
+        self.update_map(0, delta)
 
     def on_lat_text_change(self):
         value = int(self.lat_offset_input.text())
         value = max(-100, min(100, value))
         self.lat_offset_slider.setValue(value)
+        delta = value - self.lat_offset
         self.lat_offset = value
+        self.update_map(delta, 0)
 
     def on_lng_text_change(self):
         value = int(self.lng_offset_input.text())
         value = max(-100, min(100, value))
         self.lng_offset_slider.setValue(value)
+        delta = value - self.lng_offset
         self.lng_offset = value
+        self.update_map(0, delta)
+
+    def update_map(self, lat, lng):
+        update_script = f"updateMap({lat}, {lng});"
+        self.findChild(QWebEngineView).page().runJavaScript(update_script)
 
     def add_marker(self):
         for lat, lng in self.gl_widget.coordinates_stack:
