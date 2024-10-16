@@ -162,18 +162,6 @@
 
       stamen_tile_layer.addTo(my_map);
 
-      // function newTree(lat, lng) {
-      //   var redDot = L.circleMarker([lat, lng], {
-      //     radius: 2,
-      //     fillColor: "red",
-      //     color: "red",
-      //     weight: 1,
-      //     opacity: 1,
-      //     fillOpacity: 0.8,
-      //   }).addTo(my_map);
-      //   redDot.bindPopup("Latitude: " + lat + "<br>Longitude: " + lng);
-      //   trees.push(redDot);
-      // }
       function newTree(lat, lng) {
         var redDotIcon = L.divIcon({
           className: "custom-red-dot",
@@ -181,10 +169,10 @@
           html: '<div style="background-color: red; border-radius: 50%; width: 9px; height: 9px;"></div>',
         });
 
-        var del_lat = 0.00002252;
-        var del_lon = -0.00005325;
+        var lat = lat + 0.00002252;
+        var lon = lon - 0.00005325;
 
-        var redDot = L.marker([lat + del_lat, lng + del_lon], {
+        var redDot = L.marker([lat, lng], {
           icon: redDotIcon,
         }).addTo(my_map);
         redDot.dragging.enable();
@@ -193,6 +181,7 @@
           my_map.removeLayer(redDot);
           trees = trees.filter((tree) => tree !== redDot);
         });
+
         redDot.bindPopup("Latitude: " + lat + "<br>Longitude: " + lng);
         trees.push(redDot);
       }
@@ -239,6 +228,23 @@
 
         var marker = L.marker([lat, lng], { icon: icon }).addTo(my_map);
         pos = marker;
+      }
+
+      function updateMap(lat_offset_meters, lon_offset_meters) {
+        trees.forEach((tree) => {
+          var lat = tree.getLatLng().lat;
+          var lon = tree.getLatLng().lng;
+
+          var lat_offset_degrees = lat_offset_meters / 1113200;
+
+          var lon_offset_degrees = lon_offset_meters / 1113200;
+
+          var new_lat = lat + lat_offset_degrees;
+          var new_lon = lon + lon_offset_degrees;
+
+          tree.setLatLng([new_lat, new_lon]);
+          tree.bindPopup("Latitude: " + new_lat + "<br>Longitude: " + new_lon);
+        });
       }
 
       function copyToClipboard(text) {

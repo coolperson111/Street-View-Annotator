@@ -1,4 +1,3 @@
-import numpy as np
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from PyQt5 import QtGui
@@ -6,7 +5,7 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QMainWindow, QWidget
 
 from ui.map import FoliumWidget
-from ui.sidebar import SidebarWidget
+# from ui.sidebar import SidebarWidget
 from ui.streetview import GLWidget
 from utils.processor import *
 
@@ -68,8 +67,8 @@ class MainWindow(QMainWindow):
             lat = self.clipboard_lat
             lng = self.clipboard_lng
 
-        if self.sidebar_widget:
-            self.sidebar_widget.update_lat_lng(lat, lng)
+        # if self.sidebar_widget:
+        #     self.sidebar_widget.update_lat_lng(lat, lng)
 
         self.image, self.depth, self.heading, self.latitude, self.longitude = (
             process_location(lat, lng)
@@ -83,7 +82,7 @@ class MainWindow(QMainWindow):
         self.central_layout.removeWidget(self.gl_widget)
         self.gl_widget.deleteLater()
         self.create_gl_widget(yaw=yaw)
-        self.centralWidget().layout().insertWidget(1, self.gl_widget, stretch=1)
+        self.centralWidget().layout().insertWidget(0, self.gl_widget, stretch=1)
         self.folium_widget.markers.append((lat, lng))
 
     def update_position(self, lat, lng, yaw):
