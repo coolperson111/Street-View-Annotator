@@ -24,11 +24,11 @@ class MainWindow(QMainWindow):
         # self.heading = 0 # uncomment for offline
         # self.image = Image.open('assets/demo/demo_image.jpg') # uncomment for offline
         # self.depth = np.load('assets/demo/demo_depth.npy') # uncomment for offline
-        self.sidebar_widget = None
+        # self.sidebar_widget = None
         self.folium_widget = None
         self.create_gl_widget()
-        self.sidebar_widget = SidebarWidget(self.gl_widget)
-        self.gl_widget.sidebar_widget = self.sidebar_widget
+        # self.sidebar_widget = SidebarWidget(self.gl_widget)
+        # self.gl_widget.sidebar_widget = self.sidebar_widget
         self.folium_widget = FoliumWidget(self, self.gl_widget)
         self.clipboard = QApplication.clipboard()
         self.clipboard.dataChanged.connect(self.on_clipboard_change)
@@ -37,7 +37,7 @@ class MainWindow(QMainWindow):
 
     def setup_ui(self):
         self.central_layout = QHBoxLayout()
-        self.central_layout.addWidget(self.sidebar_widget)
+        # self.central_layout.addWidget(self.sidebar_widget)
         self.central_layout.addWidget(self.gl_widget, stretch=1)
         self.central_layout.addWidget(self.folium_widget, stretch=1)
 
@@ -51,15 +51,17 @@ class MainWindow(QMainWindow):
             image=self.image,
             depth=self.depth,
             heading=self.heading,
-            sidebar_widget=None,
+            # sidebar_widget=None,
             lat=self.latitude,
             lng=self.longitude,
             yaw=yaw,
         )
-        self.gl_widget.sidebar_widget = self.sidebar_widget
-        if self.folium_widget is not None and self.sidebar_widget is not None:
+        # self.gl_widget.sidebar_widget = self.sidebar_widget
+        # if self.folium_widget is not None and self.sidebar_widget is not None:
+        #     self.folium_widget.gl_widget = self.gl_widget
+        #     self.sidebar_widget.gl_widget = self.gl_widget
+        if self.folium_widget is not None:
             self.folium_widget.gl_widget = self.gl_widget
-            self.sidebar_widget.gl_widget = self.gl_widget
 
     def get_panorama(self, lat=None, lng=None, yaw=0):
         if lat is None or lng is None:
