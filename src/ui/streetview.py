@@ -15,7 +15,7 @@ from utils.utils import calculate
 
 
 class GLWidget(QGLWidget):
-    def __init__(self, parent, sidebar_widget, image, depth, heading, lat, lng, yaw):
+    def __init__(self, parent, image, depth, heading, lat, lng, yaw):
         super().__init__(parent)
         self.window = parent
 
@@ -39,7 +39,7 @@ class GLWidget(QGLWidget):
         self.coordinates_stack = []
         self.markers_stack = []
 
-        self.sidebar_widget = sidebar_widget
+        # self.sidebar_widget = sidebar_widget
         # street view params
         self.stroke_width = 25
         self.transparency = 50  # in range 0-100
@@ -111,7 +111,7 @@ class GLWidget(QGLWidget):
             (image_pixel_x, image_pixel_y) = self.markers_stack.pop()
             (lat, lng) = self.coordinates_stack.pop()
             self.erase_point(image_pixel_x, image_pixel_y)
-            self.sidebar_widget.update_coordinates_label()
+            # self.sidebar_widget.update_coordinates_label()
         elif event.key() == QtCore.Qt.Key_J:
             lat, lng = move_in_heading(self.lat, self.lng, self.yaw + 180)
             self.window.get_panorama(lat, lng, self.yaw)
@@ -155,7 +155,7 @@ class GLWidget(QGLWidget):
             self.draw_point(image_pixel_x, image_pixel_y)
             self.markers_stack.append((image_pixel_x, image_pixel_y))
             self.coordinates_stack.append((lat, lng))
-            self.sidebar_widget.update_coordinates_label()
+            # self.sidebar_widget.update_coordinates_label()
         else:
             print("Inf")
 

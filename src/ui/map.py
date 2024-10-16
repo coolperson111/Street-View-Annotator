@@ -1,7 +1,9 @@
+from PyQt5.QtCore import Qt
 from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtWidgets import (QColorDialog, QHBoxLayout, QInputDialog, QLabel,
-                             QLineEdit, QListWidget, QListWidgetItem,
-                             QPushButton, QSlider, QVBoxLayout, QWidget)
+from PyQt5.QtWidgets import (QColorDialog, QGridLayout, QHBoxLayout,
+                             QInputDialog, QLabel, QLineEdit, QListWidget,
+                             QListWidgetItem, QPushButton, QSizePolicy,
+                             QSlider, QVBoxLayout, QWidget)
 
 from utils.processor import *
 from utils.utils import save_image
@@ -13,7 +15,9 @@ class FoliumWidget(QWidget):
         self.gl_widget = gl_widget
         self.main_window = main_window
         self.markers = []
-        self.Polygons = []
+        # self.Polygons = []
+        self.lat_offset = 0
+        self.lng_offset = 0
         self.init_ui()
         self.folder_path = "Output"
 
@@ -25,27 +29,74 @@ class FoliumWidget(QWidget):
         # self.coord_input = QLineEdit(self)
         # layout.addWidget(self.coord_input)
 
+        button_layout = QGridLayout()
+
         # to trigger the coordinate update
         update_button = QPushButton("Save Map", self)
         update_button.clicked.connect(self.update_map_with_input)
-        layout.addWidget(update_button)
+        button_layout.addWidget(update_button, 0, 0)
 
         # to get the panorama
         panorama_button = QPushButton("Get Panorama", self)
         panorama_button.clicked.connect(self.main_window.get_panorama)
-        layout.addWidget(panorama_button)
+        button_layout.addWidget(panorama_button, 0, 1)
 
         # to trigger polygon drawing
-        add_button = QPushButton("Add Markers", self)
+        add_button = QPushButton("Add Annotations", self)
         add_button.clicked.connect(self.add_marker)
-        layout.addWidget(add_button)
+        button_layout.addWidget(add_button, 1, 0)
 
         # to remove the marker
         remove_button = QPushButton("Remove Markers", self)
         remove_button.clicked.connect(self.remove_marker)
-        layout.addWidget(remove_button)
+        button_layout.addWidget(remove_button, 1, 1)
 
-        # to display the Folium map
+        layout.addLayout(button_layout)
+
+        # Layout for latitude offset slider and its components
+        lat_slider_layout = QHBoxLayout()
+        lat_slider_label = QLabel("Lat Offset:")
+        lat_slider_label.setFixedWidth(80)
+        self.lat_offset_slider = QSlider(Qt.Horizontal)
+        self.lat_offset_slider.setMinimum(-100)
+        self.lat_offset_slider.setMaximum(100)
+        self.lat_offset_slider.setValue(0)
+        self.lat_offset_slider.valueChanged.connect(self.on_lat_slider_change)
+
+        self.lat_offset_input = QLineEdit("0")
+        self.lat_offset_input.setFixedWidth(40)
+        self.lat_offset_input.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.lat_offset_input.returnPressed.connect(self.on_lat_text_change)
+
+        # Add the latitude slider, label, and input box to the horizontal layout
+        lat_slider_layout.addWidget(lat_slider_label)
+        lat_slider_layout.addWidget(self.lat_offset_slider)
+        lat_slider_layout.addWidget(self.lat_offset_input)
+
+        # Layout for longitude offset slider and its components
+        lng_slider_layout = QHBoxLayout()
+        lng_slider_label = QLabel("Lng Offset:")
+        lng_slider_label.setFixedWidth(80)
+        self.lng_offset_slider = QSlider(Qt.Horizontal)
+        self.lng_offset_slider.setMinimum(-100)
+        self.lng_offset_slider.setMaximum(100)
+        self.lng_offset_slider.setValue(0)
+        self.lng_offset_slider.valueChanged.connect(self.on_lng_slider_change)
+
+        self.lng_offset_input = QLineEdit("0")
+        self.lng_offset_input.setFixedWidth(40)
+        self.lng_offset_input.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.lng_offset_input.returnPressed.connect(self.on_lng_text_change)
+
+        # Add the longitude slider, label, and input box to the horizontal layout
+        lng_slider_layout.addWidget(lng_slider_label)
+        lng_slider_layout.addWidget(self.lng_offset_slider)
+        lng_slider_layout.addWidget(self.lng_offset_input)
+
+        # Add both horizontal slider layouts to the main vertical layout
+        layout.addLayout(lat_slider_layout)
+        layout.addLayout(lng_slider_layout)
+
         web_view = QWebEngineView()
         web_view.setHtml(open("src/ui/map_final.html").read())
         layout.addWidget(web_view)
@@ -75,6 +126,28 @@ class FoliumWidget(QWidget):
             self.gl_widget.yaw,
             street=True,
         )
+
+    def on_lat_slider_change(self):
+        value = self.lat_offset_slider.value()
+        self.lat_offset = value
+        self.lat_offset_input.setText(str(value))
+
+    def on_lng_slider_change(self):
+        value = self.lng_offset_slider.value()
+        self.lng_offset = value
+        self.lng_offset_input.setText(str(value))
+
+    def on_lat_text_change(self):
+        value = int(self.lat_offset_input.text())
+        value = max(-100, min(100, value))
+        self.lat_offset_slider.setValue(value)
+        self.lat_offset = value
+
+    def on_lng_text_change(self):
+        value = int(self.lng_offset_input.text())
+        value = max(-100, min(100, value))
+        self.lng_offset_slider.setValue(value)
+        self.lng_offset = value
 
     def add_marker(self):
         for lat, lng in self.gl_widget.coordinates_stack:
