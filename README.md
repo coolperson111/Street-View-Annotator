@@ -70,8 +70,6 @@ The app consists of three main components:
 
 ### Street View Display
 
-<img src="https://github.com/Frozensun47/Street-View-Annotator/blob/main/assets/imgs/Readme/street_view_marker.gif" alt="App Overview GIF" width="400" height="200">
-
 In the left, there is the street view display with functionalities:
 
 - **Pan:** Hold and move Left-click inside the street view display area and move the mouse. Scroll up and down to set the FOV.
