@@ -182,6 +182,12 @@
           trees = trees.filter((tree) => tree !== redDot);
         });
 
+        redDot.on("dragend", function (e) {
+          var lat = e.target.getLatLng().lat;
+          var lng = e.target.getLatLng().lng;
+          redDot.bindPopup("Latitude: " + lat + "<br>Longitude: " + lng);
+        });
+
         redDot.bindPopup("Latitude: " + lat + "<br>Longitude: " + lng);
         trees.push(redDot);
       }
