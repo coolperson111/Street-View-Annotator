@@ -1,12 +1,10 @@
-import math
-
 from PyQt5.QtCore import Qt
 from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtWidgets import (QColorDialog, QGridLayout, QHBoxLayout,
-                             QInputDialog, QLabel, QLineEdit, QListWidget,
-                             QListWidgetItem, QPushButton, QSizePolicy,
-                             QSlider, QVBoxLayout, QWidget)
+from PyQt5.QtWidgets import (QGridLayout, QHBoxLayout, QLabel, QLineEdit,
+                             QPushButton, QSizePolicy, QSlider, QVBoxLayout,
+                             QWidget)
 
+from utils.database import Database
 from utils.processor import *
 from utils.utils import save_image
 
@@ -49,9 +47,9 @@ class FoliumWidget(QWidget):
         button_layout.addWidget(add_button, 1, 0)
 
         # to remove the marker
-        remove_button = QPushButton("Remove Markers", self)
-        remove_button.clicked.connect(self.remove_marker)
-        button_layout.addWidget(remove_button, 1, 1)
+        save_button = QPushButton("Save Annotations", self)
+        save_button.clicked.connect(self.save_annotations)
+        button_layout.addWidget(save_button, 1, 1)
 
         layout.addLayout(button_layout)
 
@@ -128,6 +126,27 @@ class FoliumWidget(QWidget):
             self.gl_widget.yaw,
             street=True,
         )
+
+    def save_annotations(self):
+        db = Database()
+        coordinates = self.gl_widget.coordinates_stack
+        markers = self.gl_widget.markers_stack
+        for (tree_lat, tree_lng), (image_x, image_y) in zip(coordinates, markers):
+            db.insert_annotation(
+                image_path="/path/to/image.jpg",
+                pano_id="pano_001",
+                stview_lat=self.gl_widget.lat,
+                stview_lng=self.gl_widget.lng,
+                tree_lat=tree_lat,
+                tree_lng=tree_lng,
+                lat_offset=self.lat_offset,
+                lng_offset=self.lng_offset,
+                image_x=image_x,
+                image_y=image_y,
+                height=0,
+                diameter=0,
+            )
+        db.close()
 
     def on_lat_slider_change(self):
         value = self.lat_offset_slider.value()
