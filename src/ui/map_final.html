@@ -81,6 +81,7 @@
       var markers = [];
       var polygons = [];
       var trees = [];
+      var loaded_trees = [];
       var pos = null;
       var my_map = L.map("my_map", {
         center: [30.71979998667062, 76.72142742674824],
@@ -162,15 +163,12 @@
 
       stamen_tile_layer.addTo(my_map);
 
-      function newTree(lat, lng) {
+      function newTree(lat, lng, load = false) {
         var redDotIcon = L.divIcon({
           className: "custom-red-dot",
           iconSize: [6, 6],
           html: '<div style="background-color: red; border-radius: 50%; width: 9px; height: 9px;"></div>',
         });
-
-        var lat = lat + 0.00002252;
-        var lon = lon - 0.00005325;
 
         var redDot = L.marker([lat, lng], {
           icon: redDotIcon,
@@ -189,7 +187,11 @@
         });
 
         redDot.bindPopup("Latitude: " + lat + "<br>Longitude: " + lng);
-        trees.push(redDot);
+        if (load) {
+          loaded_trees.push(redDot);
+        } else {
+          trees.push(redDot);
+        }
       }
 
       function newMarker(e) {

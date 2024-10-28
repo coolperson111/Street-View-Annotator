@@ -63,7 +63,7 @@ def process_location(lat, long):
     heading_degrees = degrees(pano.heading)
     print("Permalink:", pano.permalink(heading=heading_degrees, pitch=90))
     if pano.depth:
-        depth_map, depth_map_path, depth_image_path = save_depth_map(pano)
+        depth_map = pano.depth.data
     return panorma, depth_map, heading_degrees, pano.lat, pano.lon
 
 

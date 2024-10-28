@@ -101,6 +101,10 @@ class FoliumWidget(QWidget):
         web_view.setHtml(open("src/ui/map_final.html").read())
         layout.addWidget(web_view)
 
+        # once the map is loaded, load the markers
+        web_view.loadFinished.connect(lambda: self.load_marker(Database().load_saved()))
+        print(Database().load_saved())
+
         # # to annotate
         # add_button = QPushButton("Annotate", self)
         # add_button.clicked.connect(self.add_vertice)
@@ -182,9 +186,21 @@ class FoliumWidget(QWidget):
         update_script = f"updateMap({lat}, {lng});"
         self.findChild(QWebEngineView).page().runJavaScript(update_script)
 
+    def load_marker(self, coordinates):
+        for lat, lng, lat_offset, lng_offset in coordinates:
+            lat += lat_offset / 1113200
+            lng += lng_offset / 1113200
+
+            update_script = f"newTree({lat}, {lng}, true);"
+            self.findChild(QWebEngineView).page().runJavaScript(update_script)
+            self.markers.append((lat, lng))
+
     def add_marker(self):
         for lat, lng in self.gl_widget.coordinates_stack:
-            update_script = f"newTree({lat}, {lng});"
+            lat += self.lat_offset / 1113200
+            lng += self.lng_offset / 1113200
+
+            update_script = f"newTree({lat}, {lng}, false);"
             self.findChild(QWebEngineView).page().runJavaScript(update_script)
             self.markers.append((lat, lng))
 
