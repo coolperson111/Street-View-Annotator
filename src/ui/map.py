@@ -103,7 +103,6 @@ class FoliumWidget(QWidget):
 
         # once the map is loaded, load the markers
         web_view.loadFinished.connect(lambda: self.load_marker(Database().load_saved()))
-        print(Database().load_saved())
 
         # # to annotate
         # add_button = QPushButton("Annotate", self)
@@ -151,6 +150,8 @@ class FoliumWidget(QWidget):
                 diameter=0,
             )
         db.close()
+        update_script = f"changeList();"
+        self.findChild(QWebEngineView).page().runJavaScript(update_script)
 
     def on_lat_slider_change(self):
         value = self.lat_offset_slider.value()
@@ -203,11 +204,6 @@ class FoliumWidget(QWidget):
             update_script = f"newTree({lat}, {lng}, false);"
             self.findChild(QWebEngineView).page().runJavaScript(update_script)
             self.markers.append((lat, lng))
-
-    def remove_marker(self):
-        remove_script = f"removeMarker();"
-        self.findChild(QWebEngineView).page().runJavaScript(remove_script)
-        self.markers = []
 
     # def save_map_as_png(self):
     #     folder_path = "Output"
