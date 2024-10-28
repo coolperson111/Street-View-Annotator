@@ -163,6 +163,15 @@
 
       stamen_tile_layer.addTo(my_map);
 
+      function changeList() {
+        trees.forEach((tree) => {
+          var lat = tree.getLatLng().lat;
+          var lng = tree.getLatLng().lng;
+          newTree(lat, lng, true);
+        });
+        trees = [];
+      }
+
       function newTree(lat, lng, load = false) {
         var redDotIcon = L.divIcon({
           className: "custom-red-dot",
