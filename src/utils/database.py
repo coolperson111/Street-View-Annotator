@@ -1,4 +1,5 @@
 import getpass
+import os
 
 import psycopg2
 from psycopg2 import sql
@@ -7,11 +8,11 @@ from psycopg2 import sql
 class Database:
     def __init__(self):
         # Database connection URL
-        db_url = "postgresql://Utkarsh:geovision123@localhost:5432/treeinv"
+        DB_URL = os.getenv("DB_URL")
 
         # Establish connection to the database
         try:
-            self.conn = psycopg2.connect(db_url)
+            self.conn = psycopg2.connect(DB_URL)
             self.cur = self.conn.cursor()
             print("Database connection successful.")
         except Exception as e:
