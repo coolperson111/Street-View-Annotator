@@ -105,6 +105,16 @@ class Database:
             print(e)
             self.conn.rollback()
 
+    def load_saved(self):
+        query = sql.SQL("SELECT lat, lng, lat_offset, lng_offset FROM tree_details;")
+
+        try:
+            self.cur.execute(query)
+            return self.cur.fetchall()
+        except Exception as e:
+            print(f"Error in load_saved: {e}")
+            return []
+
     def close(self):
         if self.cur:
             self.cur.close()
