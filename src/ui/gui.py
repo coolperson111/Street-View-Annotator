@@ -11,14 +11,22 @@ from utils.processor import *
 
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, lat, lng):
         super().__init__()
         self.setWindowTitle("Street View Annotator")
         self.setWindowIcon(QtGui.QIcon("assets/imgs/icon.png"))
-        self.latitude, self.longitude = 30.71979998667062, 76.72142742674824
+        self.latitude, self.longitude = lat, lng
+        self.panorama_id = None
         self.clipboard_lat, self.clipboard_lng = 30.71979998667062, 76.72142742674824
-        self.image, self.depth, self.heading, self.latitude, self.longitude = (
-            process_location(self.latitude, self.longitude)
+        (
+            self.image,
+            self.depth,
+            self.heading,
+            self.latitude,
+            self.longitude,
+            self.panorama_id,
+        ) = process_location(
+            self.latitude, self.longitude
         )  # comment for offline
         # self.heading = 0 # uncomment for offline
         # self.image = Image.open('assets/demo/demo_image.jpg') # uncomment for offline
@@ -70,9 +78,14 @@ class MainWindow(QMainWindow):
         # if self.sidebar_widget:
         #     self.sidebar_widget.update_lat_lng(lat, lng)
 
-        self.image, self.depth, self.heading, self.latitude, self.longitude = (
-            process_location(lat, lng)
-        )
+        (
+            self.image,
+            self.depth,
+            self.heading,
+            self.latitude,
+            self.longitude,
+            self.panorama_id,
+        ) = process_location(lat, lng)
 
         if self.image is None:
             return

@@ -137,7 +137,7 @@ class FoliumWidget(QWidget):
         for (tree_lat, tree_lng), (image_x, image_y) in zip(coordinates, markers):
             db.insert_annotation(
                 image_path="/path/to/image.jpg",
-                pano_id="pano_001",
+                pano_id=self.main_window.panorama_id,
                 stview_lat=self.gl_widget.lat,
                 stview_lng=self.gl_widget.lng,
                 tree_lat=tree_lat,
