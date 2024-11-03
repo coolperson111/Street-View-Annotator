@@ -8,7 +8,7 @@ from psycopg2 import sql
 class Database:
     def __init__(self):
         # Database connection URL
-        DB_URL = os.getenv("DB_URL")
+        DB_URL = "postgresql://utkarsh:uOphh5OzXd7N1aDrLWGtvD9gmN8DFWxN@dpg-csfl7aogph6c73f4h5m0-a.oregon-postgres.render.com/treeinv"
 
         # Establish connection to the database
         try:
@@ -106,6 +106,7 @@ class Database:
             self.conn.rollback()
 
     def load_saved(self):
+
         query = sql.SQL("SELECT lat, lng, lat_offset, lng_offset FROM tree_details;")
 
         try:

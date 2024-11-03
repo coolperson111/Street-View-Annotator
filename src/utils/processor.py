@@ -57,14 +57,14 @@ def save_depth_map(pano):
 def process_location(lat, long):
     pano_id = get_panorama_id(lat, long)
     if pano_id is None:
-        return None, None, None, None, None
+        return None, None, None, None, None, None
     panorma, pano = download_panorama_image_and_depth(pano_id)
 
     heading_degrees = degrees(pano.heading)
     print("Permalink:", pano.permalink(heading=heading_degrees, pitch=90))
     if pano.depth:
         depth_map = pano.depth.data
-    return panorma, depth_map, heading_degrees, pano.lat, pano.lon
+    return panorma, depth_map, heading_degrees, pano.lat, pano.lon, pano_id
 
 
 # def generate_heading_pitch_arrays(pano_id, width=512, height=256, center_heading=0):
