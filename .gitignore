@@ -2,7 +2,15 @@
 
 # our own ignore files
 .DS_Store
-./utils/__pycache__/
+src/ui/.DS_Store
+src/ui/__pycache__/
+src/utils/__pycache__/
+src/utils/.DS_Store
+src/.DS_Store
+src/__pycache__/
+src/treemodel/__pycache__/
+src/treemodel/.DS_Store
+runs
 data/
 Output/
 
