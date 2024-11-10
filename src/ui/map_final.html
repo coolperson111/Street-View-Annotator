@@ -172,12 +172,20 @@
         trees = [];
       }
 
-      function newTree(lat, lng, load = false) {
-        var redDotIcon = L.divIcon({
-          className: "custom-red-dot",
-          iconSize: [6, 6],
-          html: '<div style="background-color: red; border-radius: 50%; width: 9px; height: 9px;"></div>',
-        });
+      function newTree(lat, lng, predict = false, load = false) {
+        if (predict) {
+          var redDotIcon = L.divIcon({
+            className: "custom-red-dot",
+            iconSize: [6, 6],
+            html: '<div style="background-color: red; border-radius: 50%; width: 9px; height: 9px;"></div>',
+          });
+        } else {
+          var redDotIcon = L.divIcon({
+            className: "custom-red-dot",
+            iconSize: [6, 6],
+            html: '<div style="background-color: blue; border-radius: 50%; width: 9px; height: 9px;"></div>',
+          });
+        }
 
         var redDot = L.marker([lat, lng], {
           icon: redDotIcon,

@@ -1,6 +1,7 @@
 import base64
 import os
 
+import cv2
 import numpy as np
 from OpenGL.GL import *
 from OpenGL.GLU import *
@@ -10,6 +11,7 @@ from PyQt5.QtCore import QPoint, Qt
 from PyQt5.QtGui import QCursor
 from PyQt5.QtOpenGL import QGLWidget
 
+from treemodel.detect import detect_trees
 from utils.processor import move_in_heading
 from utils.utils import calculate
 
@@ -48,6 +50,13 @@ class GLWidget(QGLWidget):
         self.map_color = (255, 0, 0, 128)
         self.map_transparency = 0.5  # in range 0-1
         self.map_color_name = "Red"
+
+        cv2.imwrite("temp.jpg", cv2.cvtColor(np.array(self.image), cv2.COLOR_RGB2BGR))
+        self.model_coordinates = detect_trees("temp.jpg")
+        os.remove("temp.jpg")
+
+        self.model_output = []
+        self.handle_model_output()
 
     def initializeGL(self):
         glEnable(GL_TEXTURE_2D)
@@ -158,6 +167,32 @@ class GLWidget(QGLWidget):
             # self.sidebar_widget.update_coordinates_label()
         else:
             print("Inf")
+
+    def handle_model_output(self):
+        for x, y, theta in self.model_coordinates:
+            distance, self.direction, image_pixel_x, image_pixel_y, depth = calculate(
+                x,
+                y,
+                abs(theta - 90),
+                self.pitch,
+                self.depth,
+                self.image_width,
+                self.image_height,
+                self.width(),
+                self.height(),
+                self.heading,
+            )
+
+            if depth > 0 and distance > 0:
+                print(
+                    f"depth = {depth}, Distance = {distance}, Heading = {self.heading}, Direction = {int(self.direction)}"
+                )
+                lat, lng = move_in_heading(
+                    self.lat, self.lng, int(self.direction), distance / 1000
+                )
+                self.model_output.append((lat, lng))
+            else:
+                print("Inf")
 
     def mouseMoveEvent(self, event):
         if self.moving:

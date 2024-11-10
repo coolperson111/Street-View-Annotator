@@ -32,8 +32,12 @@ class FoliumWidget(QWidget):
         button_layout = QGridLayout()
 
         # to trigger the coordinate update
-        update_button = QPushButton("Save Map", self)
-        update_button.clicked.connect(self.save_map_with_input)
+        # update_button = QPushButton("Save Map", self)
+        # update_button.clicked.connect(self.save_map_with_input)
+        # button_layout.addWidget(update_button, 0, 0)
+
+        update_button = QPushButton("Predict", self)
+        update_button.clicked.connect(self.predict_trees)
         button_layout.addWidget(update_button, 0, 0)
 
         # to get the panorama
@@ -130,6 +134,15 @@ class FoliumWidget(QWidget):
             street=True,
         )
 
+    def predict_trees(self):
+        for lat, lng in self.gl_widget.model_output:
+            lat += self.lat_offset / 1113200
+            lng += self.lng_offset / 1113200
+
+            update_script = f"newTree({lat}, {lng}, true, false);"
+            self.findChild(QWebEngineView).page().runJavaScript(update_script)
+            self.markers.append((lat, lng))
+
     def save_annotations(self):
         db = Database()
         coordinates = self.gl_widget.coordinates_stack
@@ -192,7 +205,7 @@ class FoliumWidget(QWidget):
             lat += lat_offset / 1113200
             lng += lng_offset / 1113200
 
-            update_script = f"newTree({lat}, {lng}, true);"
+            update_script = f"newTree({lat}, {lng}, false, true);"
             self.findChild(QWebEngineView).page().runJavaScript(update_script)
             self.markers.append((lat, lng))
 
@@ -201,7 +214,7 @@ class FoliumWidget(QWidget):
             lat += self.lat_offset / 1113200
             lng += self.lng_offset / 1113200
 
-            update_script = f"newTree({lat}, {lng}, false);"
+            update_script = f"newTree({lat}, {lng}, false, false);"
             self.findChild(QWebEngineView).page().runJavaScript(update_script)
             self.markers.append((lat, lng))
 
