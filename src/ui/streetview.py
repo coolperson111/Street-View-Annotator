@@ -13,7 +13,7 @@ from PyQt5.QtOpenGL import QGLWidget
 
 from treemodel.detect import detect_trees
 from utils.processor import move_in_heading
-from utils.utils import calculate
+from utils.utils import calculate, calculate_image_pixel_coordinates
 
 
 class GLWidget(QGLWidget):
@@ -141,16 +141,20 @@ class GLWidget(QGLWidget):
     def handle_right_button_press(self, event):
         self.mouse_x, self.mouse_y = event.pos().x(), event.pos().y()
 
-        distance, self.direction, image_pixel_x, image_pixel_y, depth = calculate(
-            self.mouse_x,
-            self.mouse_y,
+        cal_yaw = (self.yaw + 270) % 360
+        cal_pitch = (self.pitch + 90) % 180
+        image_pixel_x, image_pixel_y = calculate_image_pixel_coordinates(
+            cal_yaw, cal_pitch, self.image_width, self.image_height
+        )
+
+        distance, self.direction, depth = calculate(
+            image_pixel_x,
+            image_pixel_y,
             self.yaw,
             self.pitch,
             self.depth,
             self.image_width,
             self.image_height,
-            self.width(),
-            self.height(),
             self.heading,
         )
 
@@ -170,7 +174,7 @@ class GLWidget(QGLWidget):
 
     def handle_model_output(self):
         for x, y, theta in self.model_coordinates:
-            distance, self.direction, image_pixel_x, image_pixel_y, depth = calculate(
+            distance, self.direction, depth = calculate(
                 x,
                 y,
                 abs(theta - 90),
@@ -178,8 +182,6 @@ class GLWidget(QGLWidget):
                 self.depth,
                 self.image_width,
                 self.image_height,
-                self.width(),
-                self.height(),
                 self.heading,
             )
 

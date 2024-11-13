@@ -14,10 +14,9 @@ class MainWindow(QMainWindow):
     def __init__(self, lat, lng):
         super().__init__()
         self.setWindowTitle("Street View Annotator")
-        self.setWindowIcon(QtGui.QIcon("assets/imgs/icon.png"))
         self.latitude, self.longitude = lat, lng
         self.panorama_id = None
-        self.clipboard_lat, self.clipboard_lng = 30.71979998667062, 76.72142742674824
+        self.clipboard_lat, self.clipboard_lng = lat, lng
         (
             self.image,
             self.depth,

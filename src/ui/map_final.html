@@ -92,6 +92,10 @@
         doubleClickZoom: false,
       });
       position(30.71979998667062, 76.72142742674824, 180);
+      function updateMapCenter(lat, lng) {
+        my_map.setView([lat, lng]);
+        position(lat, lng, 180);
+      }
 
       var osm_tile_layer = L.tileLayer(
         "https://tile.openstreetmap.org/{z}/{x}/{y}.png",

@@ -98,9 +98,14 @@ def map_perspective_point_to_original(
     K_inv = np.linalg.inv(K)
 
     # Convert perspective (x, y) to 3D point in camera coordinates
-    xyz = np.array([perspective_x, perspective_y, 1.0], dtype=np.float32) @ K_inv.T
+    # Add small offsets for rounding to help stability
+    xyz = (
+        np.array([perspective_x + 0.5, perspective_y + 0.5, 1.0], dtype=np.float32)
+        @ K_inv.T
+    )
+    xyz = xyz / np.linalg.norm(xyz)  # Normalize to get a unit vector
 
-    # Step 2: Apply rotation to match original panoramic orientation
+    # Step 2: Apply rotation to match the original panoramic orientation
     y_axis = np.array([0.0, 1.0, 0.0], dtype=np.float32)
     x_axis = np.array([1.0, 0.0, 0.0], dtype=np.float32)
     R1, _ = cv2.Rodrigues(y_axis * np.radians(THETA))
@@ -108,13 +113,14 @@ def map_perspective_point_to_original(
     R = R2 @ R1
     xyz = xyz @ R.T
 
-    # Step 3: Convert 3D point to longitude and latitude
+    # Step 3: Convert 3D point to spherical coordinates (longitude and latitude)
     lon = np.arctan2(xyz[0], xyz[2])
-    lat = np.arcsin(xyz[1] / np.linalg.norm(xyz))
+    lat = np.arcsin(np.clip(xyz[1], -1.0, 1.0))  # Clip for stability
 
-    # Step 4: Map longitude and latitude to original panoramic coordinates
+    # Step 4: Map spherical coordinates to original panoramic coordinates
     original_x = (lon / (2 * np.pi) + 0.5) * (img_shape[1] - 1)
     original_y = (lat / np.pi + 0.5) * (img_shape[0] - 1)
+
     return original_x, original_y
 
 
@@ -159,6 +165,19 @@ def detect_trees(image_path):
             )
 
             box_coords.append((original_x, original_y, theta))
+
+    for box in box_coords:
+        cv2.circle(
+            original_img,
+            (int(box[0]), int(box[1])),
+            radius=10,
+            color=(0, 0, 255),
+            thickness=-1,
+        )
+
+    cv2.imwrite("original_image_with_points.jpg", original_img)
+
+    result = model.predict(image_path, conf=0.01, save=True)
 
     os.system("rm -rf perspectives")
 

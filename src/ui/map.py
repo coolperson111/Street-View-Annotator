@@ -102,10 +102,20 @@ class FoliumWidget(QWidget):
         layout.addLayout(lng_slider_layout)
 
         web_view = QWebEngineView()
-        web_view.setHtml(open("src/ui/map_final.html").read())
+        with open("src/ui/map_final.html", "r") as file:
+            html_content = file.read()
+        web_view.setHtml(html_content)
         layout.addWidget(web_view)
 
-        # once the map is loaded, load the markers
+        def set_map_center(lat, lon):
+            js_code = f"updateMapCenter({lat}, {lon});"
+            web_view.page().runJavaScript(js_code)
+
+        web_view.page().loadFinished.connect(
+            lambda: set_map_center(
+                self.main_window.latitude, self.main_window.longitude
+            )
+        )
         web_view.loadFinished.connect(lambda: self.load_marker(Database().load_saved()))
 
         # # to annotate
