@@ -178,7 +178,7 @@ class GLWidget(QGLWidget):
                 x,
                 y,
                 abs(theta - 90),
-                self.pitch,
+                0,
                 self.depth,
                 self.image_width,
                 self.image_height,
