@@ -1,14 +1,17 @@
-import getpass
+import os
 
 import psycopg2
+from dotenv import load_dotenv
 from psycopg2 import sql
+
+# Load the .env file
+load_dotenv()
 
 
 class Database:
     def __init__(self):
-        # Database connection URL
-        DB_URL = "postgresql://utkarsh:uOphh5OzXd7N1aDrLWGtvD9gmN8DFWxN@dpg-csfl7aogph6c73f4h5m0-a.oregon-postgres.render.com/treeinv"
-
+        # Database connection URL from .env
+        DB_URL = os.getenv("DB_URL")
         # Establish connection to the database
         try:
             self.conn = psycopg2.connect(DB_URL)
@@ -67,7 +70,7 @@ class Database:
             pano_id, image_path, stview_lat, stview_lng
         )
 
-        user = getpass.getuser()
+        user = os.getenv("USER")
 
         if image_id is None:
             print("Error: Could not obtain image_id for the annotation.")

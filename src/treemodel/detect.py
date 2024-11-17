@@ -166,17 +166,6 @@ def detect_trees(image_path):
 
             box_coords.append((original_x, original_y, theta))
 
-    for box in box_coords:
-        cv2.circle(
-            original_img,
-            (int(box[0]), int(box[1])),
-            radius=10,
-            color=(0, 0, 255),
-            thickness=-1,
-        )
-
-    cv2.imwrite("original_image_with_points.jpg", original_img)
-
     result = model.predict(image_path, conf=0.01, save=True)
 
     os.system("rm -rf perspectives")
