@@ -72,7 +72,7 @@ def calculate(
 
 
 def save_image(
-    image, lat, lng, fov_zoom=90, pitch=0, yaw=0, street=False, folder_path="Output"
+    image, lat, lng, fov_zoom=90, pitch=0, yaw=0, street=False, folder_path="data/output/images"
 ):
     """
     - Latitude

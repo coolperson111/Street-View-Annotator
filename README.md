@@ -40,6 +40,9 @@ conda activate annotator
 # Install dependencies from requirements.txt
 pip install -r requirements.txt
 
+# Make necessary directories
+mkdir -p data/output/images
+
 # Add depth maps
 mkdir -p data/Depth_maps
 wget -P data/Depth_maps/ https://github.com/Frozensun47/Street-View-Annotator/blob/main/data/Depth_maps/numpy_depth.npy

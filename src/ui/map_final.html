@@ -83,15 +83,17 @@
       var trees = [];
       var loaded_trees = [];
       var pos = null;
+      const lat = 28.584968416777624;
+      const lon = 77.19327373966009;
       var my_map = L.map("my_map", {
-        center: [30.71979998667062, 76.72142742674824],
+        center: [lat, lon],
         crs: L.CRS.EPSG3857,
         zoom: 18,
         zoomControl: true,
         preferCanvas: false,
         doubleClickZoom: false,
       });
-      position(30.71979998667062, 76.72142742674824, 180);
+      position(lat, lon, 180);
 
       var osm_tile_layer = L.tileLayer(
         "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
