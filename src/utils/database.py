@@ -2,13 +2,16 @@ import getpass
 import os
 
 import psycopg2
+from dotenv import load_dotenv
 from psycopg2 import sql
+
+load_dotenv()
 
 
 class Database:
     def __init__(self):
         # Database connection URL
-        DB_URL = "postgresql://utkarsh:uOphh5OzXd7N1aDrLWGtvD9gmN8DFWxN@dpg-csfl7aogph6c73f4h5m0-a.oregon-postgres.render.com/treeinv"
+        DB_URL = os.getenv("DATABASE_URL")
 
         # Establish connection to the database
         try:

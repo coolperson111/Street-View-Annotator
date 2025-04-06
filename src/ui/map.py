@@ -1,3 +1,6 @@
+import os
+
+import pandas as pd
 from PyQt5.QtCore import Qt
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWidgets import (QGridLayout, QHBoxLayout, QLabel, QLineEdit,
@@ -19,7 +22,7 @@ class FoliumWidget(QWidget):
         self.lat_offset = 0
         self.lng_offset = 0
         self.init_ui()
-        self.folder_path = "Output"
+        self.folder_path = "annotations.csv"
 
     def init_ui(self):
         layout = QVBoxLayout()
@@ -48,7 +51,7 @@ class FoliumWidget(QWidget):
 
         # to remove the marker
         save_button = QPushButton("Save Annotations", self)
-        save_button.clicked.connect(self.save_annotations)
+        save_button.clicked.connect(self.save_annotations_to_csv)
         button_layout.addWidget(save_button, 1, 1)
 
         layout.addLayout(button_layout)
@@ -130,7 +133,7 @@ class FoliumWidget(QWidget):
             street=True,
         )
 
-    def save_annotations(self):
+    def save_annotations_to_db(self):
         db = Database()
         coordinates = self.gl_widget.coordinates_stack
         markers = self.gl_widget.markers_stack
@@ -146,11 +149,56 @@ class FoliumWidget(QWidget):
                 lng_offset=self.lng_offset,
                 image_x=image_x,
                 image_y=image_y,
-                height=0,
-                diameter=0,
             )
         db.close()
         update_script = f"changeList();"
+        self.findChild(QWebEngineView).page().runJavaScript(update_script)
+
+    def save_annotations_to_csv(self):
+        # Define CSV file path
+        csv_file_path = self.folder_path
+
+        if os.path.exists(csv_file_path):
+            df = pd.read_csv(csv_file_path)
+        else:
+            df = pd.DataFrame(
+                columns=[
+                    "image_path",
+                    "pano_id",
+                    "stview_lat",
+                    "stview_lng",
+                    "tree_lat",
+                    "tree_lng",
+                    "lat_offset",
+                    "lng_offset",
+                    "image_x",
+                    "image_y",
+                ]
+            )
+
+        # Collect new rows in a list
+        new_rows = [
+            {
+                "image_path": "/path/to/image.jpg",
+                "pano_id": self.main_window.panorama_id,
+                "stview_lat": self.gl_widget.lat,
+                "stview_lng": self.gl_widget.lng,
+                "tree_lat": tree_lat,
+                "tree_lng": tree_lng,
+                "lat_offset": self.lat_offset,
+                "lng_offset": self.lng_offset,
+                "image_x": image_x,
+                "image_y": image_y,
+            }
+            for (tree_lat, tree_lng), (image_x, image_y) in zip(
+                self.gl_widget.coordinates_stack, self.gl_widget.markers_stack
+            )
+        ]
+
+        df = pd.concat([df, pd.DataFrame(new_rows)], ignore_index=True)
+        df.to_csv(csv_file_path, index=False)
+
+        update_script = "changeList();"
         self.findChild(QWebEngineView).page().runJavaScript(update_script)
 
     def on_lat_slider_change(self):
