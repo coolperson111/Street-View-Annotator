@@ -15,7 +15,7 @@ from utils.utils import calculate
 
 
 class GLWidget(QGLWidget):
-    def __init__(self, parent, image, depth, heading, lat, lng, yaw):
+    def __init__(self, parent, image, depth, heading, lat, lng, yaw, segmentation_mask=None):
         super().__init__(parent)
         self.window = parent
 
@@ -35,6 +35,7 @@ class GLWidget(QGLWidget):
         self.fov = 90
         self.direction = 0
         self.moving = False
+        self.segmentation_mask = segmentation_mask
 
         self.coordinates_stack = []
         self.markers_stack = []
@@ -160,6 +161,17 @@ class GLWidget(QGLWidget):
             print("Inf")
 
     def mouseMoveEvent(self, event):
+        if self.segmentation_mask is not None:
+            pixel_x, pixel_y = utils.screen_to_pixel_coordinates(
+                    event.pos().x(), event.pos().y(),
+                    self.image_width, self.image_height,
+                    self.width(), self.height()
+            )
+            if 0 <= pixel_y < self.segmentation_mask.shape[0] and 0 <= pixel_x < self.segmentation_mask.shape[1]:
+                segment_label = self.segmentation_mask[pixel_y, pixel_x]
+                if segment_label != 0:
+                    print(f"Hovering over segment: {segment_label}")
+
         if self.moving:
             center_x = self.width() // 2
             center_y = self.height() // 2

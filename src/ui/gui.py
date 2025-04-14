@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QApplication, QHBoxLayout, QMainWindow, QWidget
 from ui.map import FoliumWidget
 # from ui.sidebar import SidebarWidget
 from ui.streetview import GLWidget
+from utils.sam_inference import run_sam_segmentation
 from utils.processor import *
 
 
@@ -27,7 +28,14 @@ class MainWindow(QMainWindow):
             self.panorama_id,
         ) = process_location(
             self.latitude, self.longitude
-        )  # comment for offline
+        )
+
+        if self.image:
+            self.seg_map, self.masks = run_sam_segmentation(self.image)
+        else:
+            self.seg_map = None
+
+        # comment for offline
         # self.heading = 0 # uncomment for offline
         # self.image = Image.open('assets/demo/demo_image.jpg') # uncomment for offline
         # self.depth = np.load('assets/demo/demo_depth.npy') # uncomment for offline
@@ -62,6 +70,7 @@ class MainWindow(QMainWindow):
             lat=self.latitude,
             lng=self.longitude,
             yaw=yaw,
+            segmentation_mask=self.seg_map #pass the seg_map here
         )
         # self.gl_widget.sidebar_widget = self.sidebar_widget
         # if self.folium_widget is not None and self.sidebar_widget is not None:
@@ -86,6 +95,11 @@ class MainWindow(QMainWindow):
             self.longitude,
             self.panorama_id,
         ) = process_location(lat, lng)
+        
+        if self.image:
+            self.seg_map, self.masks = run_sam_segmentation(self.image)
+        else:
+            self.seg_map = None
 
         if self.image is None:
             return
